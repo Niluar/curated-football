@@ -1,0 +1,25 @@
+{
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "routes": [
+    { "src": "/", "dest": "/index.html" },
+    { "src": "/fr", "dest": "/index-fr.html" },
+    { "src": "/catalogue", "dest": "/catalogue.html" },
+    { "src": "/how-it-works", "dest": "/how-it-works.html" },
+    { "src": "/about", "dest": "/about.html" },
+    { "src": "/shirts/2026-0001-1", "dest": "/2026-0001-1.html" },
+    { "src": "/shirts/2026-0002-1", "dest": "/2026-0002-1.html" },
+    { "src": "/shirts/2026-0003-1", "dest": "/2026-0003-1.html" },
+    { "src": "/shirts/2026-0004-1", "dest": "/2026-0004-1.html" },
+    { "src": "/shirts/2026-0005-1", "dest": "/2026-0005-1.html" },
+    { "src": "/shirts/2026-0006-1", "dest": "/2026-0006-1.html" },
+    { "src": "/shirts/2026-0007-1", "dest": "/2026-0007-1.html" },
+    { "src": "/shirts/2026-0008-1", "dest": "/2026-0008-1.html" },
+    { "src": "/shirts/2026-0009-1", "dest": "/2026-0009-1.html" },
+    { "src": "/shirts/2026-0010-1", "dest": "/2026-0010-1.html" },
+    { "src": "/shirts/2026-0011-1", "dest": "/2026-0011-1.html" },
+    { "src": "/shirts/2026-0012-1", "dest": "/2026-0012-1.html" },
+    { "src": "/shirts/2026-0013-1", "dest": "/2026-0013-1.html" },
+    { "src": "/shirts/2026-0014-1", "dest": "/2026-0014-1.html" }
+  ]
+}

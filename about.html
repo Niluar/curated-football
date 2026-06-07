@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About — Curated.football</title>
+  <meta name="description" content="Curated.football is a specialised marketplace for authenticated match-worn and signed football shirts. Every shirt verified. Every story preserved.">
+  <meta name="robots" content="index, follow">
+  <meta name="author" content="Curated.football">
+  <link rel="canonical" href="https://curated.football/about">
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://curated.football/about">
+  <meta property="og:title" content="About — Curated.football">
+  <meta property="og:description" content="Curated.football is a specialised marketplace for authenticated match-worn and signed football shirts. Every shirt verified. Every story preserved.">
+  <meta property="og:site_name" content="Curated.football">
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="About — Curated.football">
+  <meta name="twitter:description" content="Curated.football is a specialised marketplace for authenticated match-worn and signed football shirts. Every shirt verified. Every story preserved.">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Outfit:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--bg:#f0ede9;--white:#fff;--border:#e0dbd4;--text:#141210;--dim:#4a4845;--muted:#9a9590;--gold:#b8954a}
+    body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;-webkit-font-smoothing:antialiased}
+    nav{display:flex;align-items:center;justify-content:space-between;padding:20px 48px;border-bottom:1px solid var(--border);background:var(--white);position:sticky;top:0;z-index:100}
+    .logo{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--text);text-decoration:none}
+    .tld{font-family:'IBM Plex Mono',monospace;font-size:.55em;font-weight:400;color:var(--gold);letter-spacing:.08em}
+    .nav-links{display:flex;gap:32px;list-style:none}
+    .nav-links a{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .2s}
+    .nav-links a:hover{color:var(--text)}
+    .nav-sell{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold);padding:9px 18px;text-decoration:none;transition:all .2s}
+    .nav-sell:hover{background:var(--gold);color:#fff}
+
+    .breadcrumb{padding:14px 48px;display:flex;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+    .breadcrumb a{color:var(--muted);text-decoration:none}
+
+    /* HERO */
+    .about-hero{padding:80px 48px;background:var(--white);border-bottom:1px solid var(--border);max-width:800px}
+    .hero-label{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:24px}
+    .hero-title{font-family:'Cormorant Garamond',serif;font-size:56px;font-weight:600;color:var(--text);line-height:1.1;margin-bottom:32px}
+    .hero-body p{font-size:17px;color:var(--dim);line-height:1.8;margin-bottom:20px}
+    .hero-body p:last-child{margin-bottom:0}
+
+    /* MISSIONS */
+    .missions{padding:64px 48px;border-bottom:1px solid var(--border)}
+    .section-label{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:40px}
+    .mission-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border)}
+    .mission{padding:40px 32px;background:var(--white)}
+    .mission-num{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.14em;color:var(--gold);margin-bottom:20px}
+    .mission-title{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;color:var(--text);margin-bottom:12px}
+    .mission-text{font-size:14px;color:var(--dim);line-height:1.7}
+
+    /* APPROACH */
+    .approach{padding:64px 48px;background:var(--white);border-bottom:1px solid var(--border)}
+    .approach-inner{max-width:640px}
+    .approach h2{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:600;color:var(--text);margin-bottom:24px}
+    .approach p{font-size:15px;color:var(--dim);line-height:1.8;margin-bottom:16px}
+    .approach p:last-child{margin-bottom:0}
+
+    /* STATS */
+    .stats{padding:64px 48px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border)}
+    .stat{background:var(--bg);padding:32px 24px;text-align:center}
+    .stat-num{font-family:'Cormorant Garamond',serif;font-size:48px;font-weight:600;color:var(--gold);line-height:1}
+    .stat-label{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:400;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:8px}
+
+    /* CONTACT */
+    .contact{padding:64px 48px;border-bottom:1px solid var(--border);background:var(--white)}
+    .contact h2{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:600;color:var(--text);margin-bottom:8px}
+    .contact-sub{font-size:15px;color:var(--muted);margin-bottom:40px}
+    .contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);max-width:640px}
+    .contact-item{background:var(--bg);padding:28px 24px}
+    .contact-item-label{font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+    .contact-item-val{font-size:15px;color:var(--text)}
+    .contact-item-val a{color:var(--gold);text-decoration:none}
+
+    footer{padding:26px 48px;border-top:1px solid var(--border);background:var(--white);display:flex;justify-content:space-between;align-items:center}
+    .f-logo{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--dim)}
+    .f-copy{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.05em;color:var(--muted)}
+
+    @media(max-width:900px){
+      nav{padding:16px 20px}
+      .nav-links{display:none}
+      .breadcrumb{padding:10px 20px}
+      .about-hero{padding:40px 20px;max-width:100%}
+      .hero-title{font-size:38px}
+      .missions,.approach,.contact{padding:40px 20px}
+      .mission-grid{grid-template-columns:1fr}
+      .stats{padding:40px 20px;grid-template-columns:1fr 1fr}
+      .contact-grid{grid-template-columns:1fr}
+      footer{padding:20px;flex-direction:column;gap:10px;text-align:center}
+    }
+  </style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="logo">CURATED<span class="tld">.football</span></a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="catalogue.html">Browse Shirts</a></li>
+    <li><a href="how-it-works.html">How It Works</a></li>
+    <li><a href="about.html">About</a></li>
+  </ul>
+  <a href="#" class="nav-sell">Sell a Shirt</a>
+</nav>
+
+<div class="breadcrumb">
+  <a href="index.html">Home</a><span>›</span><span>About</span>
+</div>
+
+<div class="about-hero">
+  <div class="hero-label">Our Story</div>
+  <h1 class="hero-title">A shirt is more<br>than a shirt.</h1>
+  <div class="hero-body">
+    <p>It was worn once. By one player. In one match. That's what makes it unique — not the club, not the competition, not the result. The simple fact that it was there, on a player's back, at a specific moment in time.</p>
+    <p>These shirts exist. They change hands. But the market is opaque, full of fakes, and without reliable documentation. Most shirts lose their story along the way.</p>
+    <p>We built curated.football to change that. A specialised marketplace where every shirt is authenticated before it goes live — and where every piece comes with its full story: the player, the match, the moment, the chain of custody.</p>
+  </div>
+</div>
+
+<div class="missions">
+  <div class="section-label">What We Stand For</div>
+  <div class="mission-grid">
+    <div class="mission">
+      <div class="mission-num">01 / Authentication</div>
+      <div class="mission-title">No shirt without verification</div>
+      <div class="mission-text">Every shirt is checked before it goes live. MWS/Fabricks auto-verification, recognised COA portals, or direct player provenance. If we can't verify it, it doesn't sell here.</div>
+    </div>
+    <div class="mission">
+      <div class="mission-num">02 / Protection</div>
+      <div class="mission-title">Collectors deserve a safe market</div>
+      <div class="mission-text">We arbitrate disputes. We verify certificates. We document every transaction. Whether you're spending €75 or €550, you should know exactly what you're buying.</div>
+    </div>
+    <div class="mission">
+      <div class="mission-num">03 / Access</div>
+      <div class="mission-title">Every club. Every level.</div>
+      <div class="mission-text">A shirt from Amiens matters as much as one from Real Madrid. We curate pieces from across European football — from Ligue 2 to the Champions League. If the story is real, it belongs here.</div>
+    </div>
+  </div>
+</div>
+
+<div class="approach">
+  <div class="approach-inner">
+    <div class="section-label">Our Approach</div>
+    <h2>Curation over volume</h2>
+    <p>We don't list everything. Every shirt submitted is reviewed manually. We add context — the match stats, the player's career, the significance of the moment. We assign each piece to an editorial collection.</p>
+    <p>The goal isn't to be the biggest marketplace. It's to be the most trusted one in European football.</p>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="stat">
+    <div class="stat-num">24h</div>
+    <div class="stat-label">Validation time</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">3</div>
+    <div class="stat-label">Auth levels</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">10%</div>
+    <div class="stat-label">Seller commission</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">EU</div>
+    <div class="stat-label">Scope</div>
+  </div>
+</div>
+
+<div class="contact">
+  <h2>Get in touch</h2>
+  <p class="contact-sub">Questions about a listing, a submission, or anything else.</p>
+  <div class="contact-grid">
+    <div class="contact-item">
+      <div class="contact-item-label">General</div>
+      <div class="contact-item-val"><a href="mailto:contact@curated.football">contact@curated.football</a></div>
+    </div>
+    <div class="contact-item">
+      <div class="contact-item-label">Sell a shirt</div>
+      <div class="contact-item-val"><a href="mailto:sell@curated.football">sell@curated.football</a></div>
+    </div>
+    <div class="contact-item">
+      <div class="contact-item-label">Authentication</div>
+      <div class="contact-item-val"><a href="mailto:auth@curated.football">auth@curated.football</a></div>
+    </div>
+    <div class="contact-item">
+      <div class="contact-item-label">Instagram</div>
+      <div class="contact-item-val"><a href="https://instagram.com/curated.football" target="_blank">@curated.football</a></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="f-logo">CURATED<span class="tld">.football</span></div>
+  <div class="f-copy">© 2026 Curated.football · Every shirt authenticated</div>
+</footer>
+</body>
+</html>

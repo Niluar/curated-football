@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How It Works — Curated.football</title>
+  <meta name="description" content="How we authenticate, document and sell match-worn football shirts. Three authentication levels. 24h verification. 10% seller commission.">
+  <meta name="robots" content="index, follow">
+  <meta name="author" content="Curated.football">
+  <link rel="canonical" href="https://curated.football/how-it-works">
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://curated.football/how-it-works">
+  <meta property="og:title" content="How It Works — Curated.football">
+  <meta property="og:description" content="How we authenticate, document and sell match-worn football shirts. Three authentication levels. 24h verification. 10% seller commission.">
+  <meta property="og:site_name" content="Curated.football">
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="How It Works — Curated.football">
+  <meta name="twitter:description" content="How we authenticate, document and sell match-worn football shirts. Three authentication levels. 24h verification. 10% seller commission.">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Outfit:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--bg:#f0ede9;--white:#fff;--border:#e0dbd4;--text:#141210;--dim:#4a4845;--muted:#9a9590;--gold:#b8954a}
+    body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;-webkit-font-smoothing:antialiased}
+    nav{display:flex;align-items:center;justify-content:space-between;padding:20px 48px;border-bottom:1px solid var(--border);background:var(--white);position:sticky;top:0;z-index:100}
+    .logo{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--text);text-decoration:none}
+    .tld{font-family:'IBM Plex Mono',monospace;font-size:.55em;font-weight:400;color:var(--gold);letter-spacing:.08em}
+    .nav-links{display:flex;gap:32px;list-style:none}
+    .nav-links a{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .2s}
+    .nav-links a:hover{color:var(--text)}
+    .nav-sell{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold);padding:9px 18px;text-decoration:none;transition:all .2s}
+    .nav-sell:hover{background:var(--gold);color:#fff}
+
+    .breadcrumb{padding:14px 48px;display:flex;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+    .breadcrumb a{color:var(--muted);text-decoration:none}
+
+    .page-hero{padding:64px 48px 48px;border-bottom:1px solid var(--border);background:var(--white)}
+    .page-label{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+    .page-title{font-family:'Cormorant Garamond',serif;font-size:52px;font-weight:600;color:var(--text);line-height:1.1;margin-bottom:16px}
+    .page-sub{font-size:17px;color:var(--dim);max-width:520px;line-height:1.7}
+
+    .section{padding:64px 48px;border-bottom:1px solid var(--border)}
+    .section:last-of-type{border-bottom:none}
+    .section-label{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:40px}
+    .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:32px}
+    .step{padding:32px;background:var(--white);border:1px solid var(--border)}
+    .step-num{font-family:'Cormorant Garamond',serif;font-size:48px;font-weight:600;color:rgba(184,149,74,.25);line-height:1;margin-bottom:20px}
+    .step-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--text);margin-bottom:10px}
+    .step-text{font-size:14px;color:var(--dim);line-height:1.7}
+
+    .faq{display:flex;flex-direction:column;gap:0}
+    .faq-item{padding:24px 0;border-bottom:1px solid var(--border)}
+    .faq-item:last-child{border-bottom:none}
+    .faq-q{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--text);margin-bottom:8px}
+    .faq-a{font-size:14px;color:var(--dim);line-height:1.7}
+
+    .cta-band{padding:64px 48px;background:var(--text);display:flex;align-items:center;justify-content:space-between;gap:32px}
+    .cta-text h2{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:600;color:#e8e2d8;margin-bottom:8px}
+    .cta-text p{font-size:15px;color:rgba(232,226,216,.6)}
+    .cta-btns{display:flex;gap:12px;flex-shrink:0}
+    .btn-gold{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;background:var(--gold);color:#fff;border:none;padding:16px 28px;cursor:pointer;text-decoration:none;transition:opacity .2s}
+    .btn-gold:hover{opacity:.88}
+    .btn-outline{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;background:transparent;color:#e8e2d8;border:1px solid rgba(232,226,216,.3);padding:16px 28px;cursor:pointer;text-decoration:none;transition:all .2s}
+    .btn-outline:hover{border-color:#e8e2d8}
+
+    footer{padding:26px 48px;border-top:1px solid var(--border);background:var(--white);display:flex;justify-content:space-between;align-items:center}
+    .f-logo{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--dim)}
+    .f-copy{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.05em;color:var(--muted)}
+
+    @media(max-width:900px){
+      nav{padding:16px 20px}
+      .nav-links{display:none}
+      .breadcrumb{padding:10px 20px}
+      .page-hero{padding:40px 20px 32px}
+      .page-title{font-size:36px}
+      .section{padding:40px 20px}
+      .steps{grid-template-columns:1fr;gap:16px}
+      .cta-band{padding:40px 20px;flex-direction:column;align-items:flex-start}
+      .cta-btns{flex-direction:column;width:100%}
+      .btn-gold,.btn-outline{text-align:center}
+      footer{padding:20px;flex-direction:column;gap:10px;text-align:center}
+    }
+  </style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="logo">CURATED<span class="tld">.football</span></a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="catalogue.html">Browse Shirts</a></li>
+    <li><a href="how-it-works.html">How It Works</a></li>
+    <li><a href="about.html">About</a></li>
+  </ul>
+  <a href="#" class="nav-sell">Sell a Shirt</a>
+</nav>
+
+<div class="breadcrumb">
+  <a href="index.html">Home</a><span>›</span><span>How It Works</span>
+</div>
+
+<div class="page-hero">
+  <div class="page-label">The Process</div>
+  <h1 class="page-title">Every shirt.<br>A verified story.</h1>
+  <p class="page-sub">Every shirt on curated.football has been checked, documented and authenticated before going live. Here's how it works — whether you're buying or selling.</p>
+</div>
+
+<div class="section">
+  <div class="section-label">For Buyers</div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-title">Browse the catalogue</div>
+      <div class="step-text">Every shirt comes with full documentation — player profile, match stats, chain of custody, and authentication certificate. You know exactly what you're getting.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-title">Buy or make an offer</div>
+      <div class="step-text">Buy at the listed price or submit an offer. The seller has 48 hours to accept, decline, or counter. No back-and-forth messaging — just a clean transaction.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-title">Receive your piece</div>
+      <div class="step-text">The seller ships directly to you. Shipping costs are at your charge. If the shirt doesn't match the listing, we'll arbitrate — no questions asked.</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-label">For Sellers</div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-title">Submit your shirt</div>
+      <div class="step-text">Fill out the form with the player's name, the match, your authentication certificate (MWS/Fabricks, COA, or direct provenance), and 6 photos of the shirt.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-title">We verify within 24h</div>
+      <div class="step-text">We check your certificate, enrich the listing with match data, player profile and editorial context. We approve or come back to you with questions — within 24 hours, 7 days a week.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-title">Sell and get paid</div>
+      <div class="step-text">Your shirt goes live. When it sells, you ship it. 7 days after confirmed delivery with no dispute, you receive the sale price minus our 10% commission.</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-label">Authentication</div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num" style="color:rgba(184,149,74,.4)">I</div>
+      <div class="step-title">MWS / Fabricks</div>
+      <div class="step-text">Shirts certified via MatchWornShirt's Fabricks platform. Certificate verified automatically via their online portal. The most traceable form of authentication available.</div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="color:rgba(184,149,74,.4)">II</div>
+      <div class="step-title">Recognised COA</div>
+      <div class="step-text">Certificates of Authenticity from Fanatics Authentic, Beckett (BAS), or PSA/DNA — verified manually via their online portals. Each certificate number checked.</div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="color:rgba(184,149,74,.4)">III</div>
+      <div class="step-title">Direct provenance</div>
+      <div class="step-text">Photo or video of the shirt being handed over by the player. Verified case by case. The rarest — and most personal — form of authentication.</div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="background:var(--white)">
+  <div class="section-label">Common Questions</div>
+  <div class="faq">
+    <div class="faq-item">
+      <div class="faq-q">What happens if the shirt doesn't match the listing?</div>
+      <div class="faq-a">Contact us within 48 hours of receiving the shirt. We'll look at the evidence and arbitrate. If the shirt is genuinely non-conforming, we'll handle the return process. Our decision is final.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Can I sell a shirt I previously bought on curated.football?</div>
+      <div class="faq-a">Yes. The shirt keeps its original reference number. A new listing is created (e.g. 2026-0001-2) and the ownership history is displayed on the listing. Every transaction adds to the provenance.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">What if my certificate isn't from MWS, Fanatics, Beckett or PSA?</div>
+      <div class="faq-a">Contact us before submitting. We review edge cases individually. If your provenance is solid and verifiable, we may accept it — but we don't publish unverified shirts.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">How long does authentication take?</div>
+      <div class="faq-a">We review every submission within 24 hours, 7 days a week. You'll receive a confirmation — or a request for more information — within that window.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">What photos do I need to submit?</div>
+      <div class="faq-a">Six views minimum: front, back, name/number close-up, signature close-up, badge/patches, and inner label. Natural light, flat on a neutral surface. We'll let you know if anything's missing.</div>
+    </div>
+  </div>
+</div>
+
+<div class="cta-band">
+  <div class="cta-text">
+    <h2>Ready to find your piece?</h2>
+    <p>Every shirt in the catalogue has been verified. Browse now.</p>
+  </div>
+  <div class="cta-btns">
+    <a href="catalogue.html" class="btn-gold">Browse Shirts</a>
+    <a href="#" class="btn-outline">Sell a Shirt</a>
+  </div>
+</div>
+
+<footer>
+  <div class="f-logo">CURATED<span class="tld">.football</span></div>
+  <div class="f-copy">© 2026 Curated.football · Every shirt authenticated</div>
+</footer>
+</body>
+</html>
