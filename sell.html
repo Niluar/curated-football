@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vendre un maillot — Curated.football</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Outfit:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--bg:#f0ede9;--white:#fff;--border:#e0dbd4;--text:#141210;--dim:#4a4845;--muted:#9a9590;--gold:#b8954a}
+    body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;-webkit-font-smoothing:antialiased}
+    nav{display:flex;align-items:center;justify-content:space-between;padding:20px 48px;border-bottom:1px solid var(--border);background:var(--white);position:sticky;top:0;z-index:100}
+    .logo{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--text);text-decoration:none}
+    .tld{font-family:'IBM Plex Mono',monospace;font-size:.55em;font-weight:400;color:var(--gold)}
+    .nav-right{display:flex;align-items:center;gap:16px}
+    .nav-account{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);text-decoration:none}
+
+    .page{max-width:680px;margin:0 auto;padding:64px 24px}
+    .page-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+    .page-title{font-family:'Cormorant Garamond',serif;font-size:46px;font-weight:600;margin-bottom:12px;line-height:1.1}
+    .page-sub{font-size:15px;color:var(--muted);margin-bottom:48px;line-height:1.7}
+
+    .form-section{background:var(--white);border:1px solid var(--border);padding:40px;margin-bottom:16px}
+    .form-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:20px;display:block}
+    .field{margin-bottom:20px}
+    .field label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px}
+    .field input, .field select, .field textarea{width:100%;padding:13px 16px;border:1px solid var(--border);background:transparent;font-family:'Outfit',sans-serif;font-size:15px;color:var(--text);outline:none;transition:border-color .2s;resize:none}
+    .field input:focus, .field select:focus, .field textarea:focus{border-color:var(--gold)}
+    .field-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .field-note{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5}
+
+    .auth-types{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:0}
+    .auth-type{padding:14px 12px;border:1px solid var(--border);cursor:pointer;text-align:center;transition:all .2s;user-select:none}
+    .auth-type:hover{border-color:var(--gold)}
+    .auth-type.selected{border-color:var(--gold);background:rgba(184,149,74,.06)}
+    .auth-type-name{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text);margin-top:4px}
+
+    .btn{width:100%;background:var(--gold);color:#fff;border:none;padding:16px;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:opacity .2s;margin-top:8px}
+    .btn:hover{opacity:.88}
+    .btn:disabled{opacity:.4;cursor:default}
+    .err{font-size:13px;color:#c0392b;margin-top:12px;display:none}
+    .err.show{display:block}
+    .success{text-align:center;padding:48px 24px;display:none}
+    .success.show{display:flex;flex-direction:column;align-items:center;gap:16px}
+
+    .info-bar{background:rgba(184,149,74,.08);border:1px solid rgba(184,149,74,.3);padding:16px 20px;font-size:13px;color:var(--dim);line-height:1.6;margin-bottom:32px}
+    .info-bar strong{color:var(--gold)}
+
+    @media(max-width:700px){nav{padding:16px 20px}.page{padding:40px 16px}.form-section{padding:24px 20px}.field-row{grid-template-columns:1fr}.auth-types{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="logo">CURATED<span class="tld">.football</span></a>
+  <div class="nav-right">
+    <a href="account.html" id="nav-account" class="nav-account">Mon compte</a>
+  </div>
+</nav>
+
+<div class="page">
+  <div id="form-wrap">
+    <div class="page-label">Vendre</div>
+    <h1 class="page-title">Soumettre un maillot</h1>
+    <p class="page-sub">Chaque soumission est examinée sous 24h. Si ton maillot est retenu, il sera mis en ligne avec son contexte complet — joueur, match, certificat.</p>
+
+    <div class="info-bar">
+      <strong>Commission vendeur : 10%</strong> · Frais de port à la charge de l'acheteur · Paiement J+7 après livraison confirmée
+    </div>
+
+    <div class="form-section">
+      <span class="form-label">Le joueur & le match</span>
+      <div class="field field-row">
+        <div><label>Joueur</label><input type="text" id="player" placeholder="ex. Kylian Mbappé"></div>
+        <div><label>Club</label><input type="text" id="club" placeholder="ex. PSG"></div>
+      </div>
+      <div class="field field-row">
+        <div><label>Compétition</label><input type="text" id="competition" placeholder="ex. Ligue 1"></div>
+        <div><label>Date du match</label><input type="date" id="match-date"></div>
+      </div>
+      <div class="field">
+        <label>Score & adversaire</label>
+        <input type="text" id="match" placeholder="ex. PSG 3–1 Marseille">
+      </div>
+    </div>
+
+    <div class="form-section">
+      <span class="form-label">Authentification</span>
+      <div class="field">
+        <label>Type de certificat</label>
+        <div class="auth-types">
+          <div class="auth-type selected" data-val="mws" onclick="selectAuth(this)">
+            <div>🔗</div>
+            <div class="auth-type-name">MWS / Fabricks</div>
+          </div>
+          <div class="auth-type" data-val="coa" onclick="selectAuth(this)">
+            <div>📄</div>
+            <div class="auth-type-name">COA (Fanatics / Beckett)</div>
+          </div>
+          <div class="auth-type" data-val="provenance" onclick="selectAuth(this)">
+            <div>📸</div>
+            <div class="auth-type-name">Provenance directe</div>
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Lien ou référence du certificat</label>
+        <input type="text" id="cert-ref" placeholder="URL Fabricks, numéro COA, ou description">
+      </div>
+    </div>
+
+    <div class="form-section">
+      <span class="form-label">Prix & informations</span>
+      <div class="field field-row">
+        <div>
+          <label>Prix demandé (€)</label>
+          <input type="number" id="price" placeholder="ex. 250" min="50">
+        </div>
+        <div>
+          <label>État</label>
+          <select id="condition">
+            <option value="">Sélectionner…</option>
+            <option value="unwashed">Non lavé — post-match</option>
+            <option value="washed">Lavé</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Notes complémentaires</label>
+        <textarea id="notes" rows="3" placeholder="Traces visibles, détails sur la signature, contexte de l'obtention…"></textarea>
+      </div>
+    </div>
+
+    <div class="err" id="err"></div>
+    <button class="btn" id="btn-submit" onclick="submitSell()">Envoyer la soumission</button>
+    <p style="font-size:12px;color:var(--muted);margin-top:16px;text-align:center">Tu recevras une réponse sous 24h à l'adresse associée à ton compte.</p>
+  </div>
+
+  <div class="success" id="success">
+    <div style="font-size:48px">✓</div>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600">Soumission reçue</div>
+    <p style="color:var(--muted);font-size:15px;max-width:400px;text-align:center;line-height:1.7">Nous examinons ton maillot sous 24h. Tu recevras une réponse par email avec la décision et les prochaines étapes.</p>
+    <a href="catalogue.html" style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);text-decoration:none;border:1px solid var(--gold);padding:14px 28px;margin-top:8px;transition:all .2s">Voir le catalogue</a>
+  </div>
+</div>
+
+<script>
+  const sb = supabase.createClient(
+    'https://pwakudhbkcmsdculjypp.supabase.co',
+    'sb_publishable_SULbKQTYT9Kb9U_FR-xCBA_o6wLMw04'
+  );
+
+  var selectedAuth = 'mws';
+
+  // Auth check
+  sb.auth.getSession().then(function({ data: { session } }) {
+    if (!session) {
+      window.location.href = 'login.html?next=sell.html';
+      return;
+    }
+    var link = document.getElementById('nav-account');
+    var name = session.user.user_metadata.first_name || session.user.email;
+    if (link) { link.textContent = name; }
+  });
+
+  function selectAuth(el) {
+    document.querySelectorAll('.auth-type').forEach(function(e){ e.classList.remove('selected'); });
+    el.classList.add('selected');
+    selectedAuth = el.dataset.val;
+  }
+
+  function showErr(msg) {
+    var e = document.getElementById('err');
+    e.textContent = msg; e.classList.add('show');
+    e.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+
+  async function submitSell() {
+    document.getElementById('err').classList.remove('show');
+    var player = document.getElementById('player').value.trim();
+    var club = document.getElementById('club').value.trim();
+    var competition = document.getElementById('competition').value.trim();
+    var matchDate = document.getElementById('match-date').value;
+    var price = document.getElementById('price').value;
+    var certRef = document.getElementById('cert-ref').value.trim();
+
+    if (!player || !club) return showErr('Joueur et club requis.');
+    if (!competition || !matchDate) return showErr('Compétition et date du match requis.');
+    if (!price || +price < 50) return showErr('Prix minimum : 50 €');
+    if (!certRef) return showErr('Référence du certificat requise.');
+
+    var btn = document.getElementById('btn-submit');
+    btn.textContent = 'Envoi…'; btn.disabled = true;
+
+    var { data: { session } } = await sb.auth.getSession();
+
+    // Store in Supabase
+    var { error } = await sb.from('submissions').insert([{
+      user_id: session.user.id,
+      user_email: session.user.email,
+      player: player,
+      club: club,
+      competition: competition,
+      match_date: matchDate,
+      match_score: document.getElementById('match').value.trim(),
+      price: +price,
+      auth_type: selectedAuth,
+      cert_ref: certRef,
+      condition: document.getElementById('condition').value,
+      notes: document.getElementById('notes').value.trim(),
+      status: 'pending'
+    }]);
+
+    if (error) {
+      btn.textContent = 'Envoyer la soumission'; btn.disabled = false;
+      return showErr('Erreur : ' + error.message + '. Contacte contact@curated.football');
+    }
+
+    document.getElementById('form-wrap').style.display = 'none';
+    document.getElementById('success').classList.add('show');
+  }
+</script>
+</body>
+</html>

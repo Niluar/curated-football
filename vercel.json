@@ -3,6 +3,10 @@
   "trailingSlash": false,
   "routes": [
     {
+      "src": "/sell",
+      "dest": "/sell.html"
+    },
+    {
       "src": "/account",
       "dest": "/account.html"
     },

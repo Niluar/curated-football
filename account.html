@@ -9,29 +9,49 @@
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{--bg:#f0ede9;--white:#fff;--border:#e0dbd4;--text:#141210;--dim:#4a4845;--muted:#9a9590;--gold:#b8954a}
-    body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased}
+    body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;-webkit-font-smoothing:antialiased}
     nav{display:flex;align-items:center;justify-content:space-between;padding:20px 48px;border-bottom:1px solid var(--border);background:var(--white)}
     .logo{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--text);text-decoration:none}
-    .tld{font-family:'IBM Plex Mono',monospace;font-size:.55em;font-weight:400;color:var(--gold)}
+    .tld{font-family:'IBM Plex Mono',monospace;font-size:.55em;color:var(--gold)}
     .btn-logout{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;background:none;border:1px solid var(--border);color:var(--muted);padding:9px 18px;cursor:pointer;transition:all .2s}
     .btn-logout:hover{border-color:var(--text);color:var(--text)}
 
-    .page{max-width:720px;margin:0 auto;padding:48px 24px}
+    .page{max-width:760px;margin:0 auto;padding:48px 24px}
     .page-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
     .page-title{font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:600;margin-bottom:40px}
 
+    .tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:32px}
+    .tab{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:14px 24px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s}
+    .tab:hover{color:var(--text)}
+    .tab.active{color:var(--text);border-bottom-color:var(--gold)}
+
+    .tab-content{display:none}
+    .tab-content.show{display:block}
+
     .card{background:var(--white);border:1px solid var(--border);padding:32px;margin-bottom:16px}
     .card-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:20px}
-    .info-row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)}
+
+    .info-row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--border)}
     .info-row:last-child{border-bottom:none}
     .info-key{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;color:var(--muted)}
     .info-val{font-size:14px;font-weight:500;color:var(--text)}
 
-    .empty{text-align:center;padding:40px;color:var(--muted);font-size:14px}
-    .btn-browse{display:inline-block;margin-top:16px;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;background:var(--gold);color:#fff;text-decoration:none;padding:14px 28px;transition:opacity .2s}
-    .btn-browse:hover{opacity:.88}
+    .field{margin-bottom:18px}
+    .field label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px}
+    .field input{width:100%;padding:12px 16px;border:1px solid var(--border);background:transparent;font-family:'Outfit',sans-serif;font-size:15px;color:var(--text);outline:none;transition:border-color .2s}
+    .field input:focus{border-color:var(--gold)}
+    .field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .btn-save{background:var(--gold);color:#fff;border:none;padding:14px 32px;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:opacity .2s}
+    .btn-save:hover{opacity:.88}
+    .btn-save:disabled{opacity:.4;cursor:default}
+    .save-msg{font-size:13px;margin-top:12px;display:none}
+    .save-msg.ok{color:#2d7d46;display:block}
+    .save-msg.err{color:#c0392b;display:block}
 
-    @media(max-width:600px){nav{padding:16px 20px}.page{padding:32px 16px}}
+    .empty{text-align:center;padding:48px 24px;color:var(--muted);font-size:14px;line-height:1.7}
+    .btn-browse{display:inline-block;margin-top:16px;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;background:var(--gold);color:#fff;text-decoration:none;padding:14px 28px}
+
+    @media(max-width:700px){nav{padding:16px 20px}.page{padding:32px 16px}.field-row{grid-template-columns:1fr}.tabs{overflow-x:auto}.tab{white-space:nowrap;padding:12px 16px}}
   </style>
 </head>
 <body>
@@ -42,30 +62,87 @@
 
 <div class="page">
   <div class="page-label">Mon compte</div>
-  <div class="page-title" id="welcome">Bonjour</div>
+  <div class="page-title" id="welcome">Bonjour.</div>
 
-  <div class="card">
-    <div class="card-label">Informations</div>
-    <div class="info-row">
-      <span class="info-key">Email</span>
-      <span class="info-val" id="user-email">—</span>
-    </div>
-    <div class="info-row">
-      <span class="info-key">Nom</span>
-      <span class="info-val" id="user-name">—</span>
-    </div>
-    <div class="info-row">
-      <span class="info-key">Membre depuis</span>
-      <span class="info-val" id="user-since">—</span>
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('overview')">Aperçu</div>
+    <div class="tab" onclick="showTab('profile')">Mon espace</div>
+    <div class="tab" onclick="showTab('orders')">Mes achats</div>
+    <div class="tab" onclick="showTab('listings')">Mes ventes</div>
+  </div>
+
+  <!-- TAB: APERÇU -->
+  <div class="tab-content show" id="tab-overview">
+    <div class="card">
+      <div class="card-label">Informations</div>
+      <div class="info-row"><span class="info-key">Email</span><span class="info-val" id="ov-email">—</span></div>
+      <div class="info-row"><span class="info-key">Nom</span><span class="info-val" id="ov-name">—</span></div>
+      <div class="info-row"><span class="info-key">Membre depuis</span><span class="info-val" id="ov-since">—</span></div>
     </div>
   </div>
 
-  <div class="card">
-    <div class="card-label">Mes achats</div>
-    <div class="empty">
-      Aucun achat pour l'instant.
-      <br>
-      <a href="catalogue.html" class="btn-browse">Parcourir le catalogue</a>
+  <!-- TAB: MON ESPACE -->
+  <div class="tab-content" id="tab-profile">
+    <div class="card">
+      <div class="card-label">Informations personnelles</div>
+      <div class="field field-row">
+        <div><label>Prénom</label><input type="text" id="p-fn" placeholder="Prénom"></div>
+        <div><label>Nom</label><input type="text" id="p-ln" placeholder="Nom"></div>
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="p-email" placeholder="Email">
+      </div>
+      <div class="field">
+        <label>Adresse</label>
+        <input type="text" id="p-addr" placeholder="Rue et numéro">
+      </div>
+      <div class="field field-row">
+        <div><label>Code postal</label><input type="text" id="p-zip" placeholder="75001"></div>
+        <div><label>Ville</label><input type="text" id="p-city" placeholder="Paris"></div>
+      </div>
+      <div class="field">
+        <label>Pays</label>
+        <input type="text" id="p-country" placeholder="France">
+      </div>
+      <button class="btn-save" id="btn-profile" onclick="saveProfile()">Enregistrer</button>
+      <div class="save-msg" id="profile-msg"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Mot de passe</div>
+      <div class="field">
+        <label>Nouveau mot de passe</label>
+        <input type="password" id="p-pwd1" placeholder="8 caractères minimum">
+      </div>
+      <div class="field">
+        <label>Confirmer</label>
+        <input type="password" id="p-pwd2" placeholder="Répéter le mot de passe">
+      </div>
+      <button class="btn-save" id="btn-pwd" onclick="savePassword()">Changer le mot de passe</button>
+      <div class="save-msg" id="pwd-msg"></div>
+    </div>
+  </div>
+
+  <!-- TAB: ACHATS -->
+  <div class="tab-content" id="tab-orders">
+    <div class="card">
+      <div class="empty">
+        Aucun achat pour l'instant.
+        <br>
+        <a href="catalogue.html" class="btn-browse">Parcourir le catalogue</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: VENTES -->
+  <div class="tab-content" id="tab-listings">
+    <div class="card">
+      <div class="empty">
+        Aucune mise en vente pour l'instant.
+        <br>
+        <a href="sell.html" class="btn-browse">Vendre un maillot</a>
+      </div>
     </div>
   </div>
 </div>
@@ -76,36 +153,40 @@
     'sb_publishable_SULbKQTYT9Kb9U_FR-xCBA_o6wLMw04'
   );
 
-  function fillUser(u) {
-    var meta = u.user_metadata || {};
-    var firstName = meta.first_name || (meta.full_name || meta.name || '').split(' ')[0] || '';
-    var name = meta.full_name || meta.name || ((meta.first_name||'') + ' ' + (meta.last_name||'')).trim() || u.email;
-    var since = new Date(u.created_at).toLocaleDateString('fr-FR', {day:'numeric',month:'long',year:'numeric'});
-    document.getElementById('welcome').textContent = 'Bonjour' + (firstName ? ', ' + firstName : '') + '.';
-    document.getElementById('user-email').textContent = u.email;
-    document.getElementById('user-name').textContent = name;
-    document.getElementById('user-since').textContent = since;
-  }
-
-  // Is this an OAuth callback? Don't redirect while processing
   var isCallback = window.location.search.includes('code=') || window.location.hash.includes('access_token=');
   var redirectTimer = null;
 
+  function fillUser(u) {
+    var meta = u.user_metadata || {};
+    var fn = meta.first_name || (meta.full_name||meta.name||'').split(' ')[0] || '';
+    var ln = meta.last_name || (meta.full_name||meta.name||'').split(' ').slice(1).join(' ') || '';
+    var name = (fn + ' ' + ln).trim() || u.email;
+    var since = new Date(u.created_at).toLocaleDateString('fr-FR', {day:'numeric',month:'long',year:'numeric'});
+
+    document.getElementById('welcome').textContent = 'Bonjour' + (fn ? ', ' + fn : '') + '.';
+    document.getElementById('ov-email').textContent = u.email;
+    document.getElementById('ov-name').textContent = name;
+    document.getElementById('ov-since').textContent = since;
+
+    // Pre-fill profile form
+    document.getElementById('p-fn').value = fn;
+    document.getElementById('p-ln').value = ln;
+    document.getElementById('p-email').value = u.email;
+    document.getElementById('p-addr').value = meta.address || '';
+    document.getElementById('p-zip').value = meta.zip || '';
+    document.getElementById('p-city').value = meta.city || '';
+    document.getElementById('p-country').value = meta.country || '';
+  }
+
   sb.auth.onAuthStateChange(function(event, session) {
     if (redirectTimer) { clearTimeout(redirectTimer); redirectTimer = null; }
-    if (session) {
-      fillUser(session.user);
-    } else if (event === 'SIGNED_OUT') {
-      window.location.href = 'login.html';
-    }
+    if (session) { fillUser(session.user); }
+    else if (event === 'SIGNED_OUT') { window.location.href = 'login.html'; }
   });
 
-  // Initial session check — only redirect if no session AND not a callback
   sb.auth.getSession().then(function({ data: { session } }) {
-    if (session) {
-      fillUser(session.user);
-    } else if (!isCallback) {
-      // Give onAuthStateChange 3s to fire before giving up
+    if (session) { fillUser(session.user); }
+    else if (!isCallback) {
       redirectTimer = setTimeout(function() {
         sb.auth.getSession().then(function({ data: { session: s } }) {
           if (!s) window.location.href = 'login.html';
@@ -113,6 +194,52 @@
       }, 3000);
     }
   });
+
+  function showTab(id) {
+    document.querySelectorAll('.tab').forEach(function(t,i){ t.classList.toggle('active', ['overview','profile','orders','listings'][i]===id); });
+    document.querySelectorAll('.tab-content').forEach(function(c){ c.classList.remove('show'); });
+    document.getElementById('tab-'+id).classList.add('show');
+  }
+
+  async function saveProfile() {
+    var btn = document.getElementById('btn-profile');
+    var msg = document.getElementById('profile-msg');
+    btn.textContent = 'Enregistrement…'; btn.disabled = true; msg.className = 'save-msg';
+
+    var { error } = await sb.auth.updateUser({
+      email: document.getElementById('p-email').value.trim(),
+      data: {
+        first_name: document.getElementById('p-fn').value.trim(),
+        last_name: document.getElementById('p-ln').value.trim(),
+        address: document.getElementById('p-addr').value.trim(),
+        zip: document.getElementById('p-zip').value.trim(),
+        city: document.getElementById('p-city').value.trim(),
+        country: document.getElementById('p-country').value.trim()
+      }
+    });
+
+    btn.textContent = 'Enregistrer'; btn.disabled = false;
+    if (error) { msg.textContent = error.message; msg.className = 'save-msg err'; }
+    else { msg.textContent = '✓ Informations mises à jour.'; msg.className = 'save-msg ok'; }
+  }
+
+  async function savePassword() {
+    var btn = document.getElementById('btn-pwd');
+    var msg = document.getElementById('pwd-msg');
+    var p1 = document.getElementById('p-pwd1').value;
+    var p2 = document.getElementById('p-pwd2').value;
+    msg.className = 'save-msg';
+
+    if (p1.length < 8) { msg.textContent = 'Mot de passe trop court (8 min.).'; msg.className = 'save-msg err'; return; }
+    if (p1 !== p2) { msg.textContent = 'Les mots de passe ne correspondent pas.'; msg.className = 'save-msg err'; return; }
+
+    btn.textContent = 'Mise à jour…'; btn.disabled = true;
+    var { error } = await sb.auth.updateUser({ password: p1 });
+    btn.textContent = 'Changer le mot de passe'; btn.disabled = false;
+
+    if (error) { msg.textContent = error.message; msg.className = 'save-msg err'; }
+    else { msg.textContent = '✓ Mot de passe mis à jour.'; msg.className = 'save-msg ok'; document.getElementById('p-pwd1').value = ''; document.getElementById('p-pwd2').value = ''; }
+  }
 
   async function logout() {
     await sb.auth.signOut();
