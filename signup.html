@@ -89,7 +89,7 @@
 <script>
   const SUPABASE_URL = 'https://pwakudhbkcmsdculjypp.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_SULbKQTYT9Kb9U_FR-xCBA_o6wLMw04';
-  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
 
   async function loginWithGoogle() {
     await sb.auth.signInWithOAuth({

@@ -150,7 +150,15 @@
 <script>
   const sb = supabase.createClient(
     'https://pwakudhbkcmsdculjypp.supabase.co',
-    'sb_publishable_SULbKQTYT9Kb9U_FR-xCBA_o6wLMw04'
+    'sb_publishable_SULbKQTYT9Kb9U_FR-xCBA_o6wLMw04',
+    {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        storage: window.localStorage
+      }
+    }
   );
 
   var isCallback = window.location.search.includes('code=') || window.location.hash.includes('access_token=');
@@ -206,8 +214,14 @@
     var msg = document.getElementById('profile-msg');
     btn.textContent = 'Enregistrement…'; btn.disabled = true; msg.className = 'save-msg';
 
-    var { error } = await sb.auth.updateUser({
-      email: document.getElementById('p-email').value.trim(),
+    var { data: { session } } = await sb.auth.getSession();
+    if (!session) { window.location.href = 'login.html'; return; }
+
+    var newEmail = document.getElementById('p-email').value.trim();
+    var emailChanged = newEmail !== session.user.email;
+
+    // Always update metadata first
+    var { error: metaErr } = await sb.auth.updateUser({
       data: {
         first_name: document.getElementById('p-fn').value.trim(),
         last_name: document.getElementById('p-ln').value.trim(),
@@ -219,8 +233,27 @@
     });
 
     btn.textContent = 'Enregistrer'; btn.disabled = false;
-    if (error) { msg.textContent = error.message; msg.className = 'save-msg err'; }
-    else { msg.textContent = '✓ Informations mises à jour.'; msg.className = 'save-msg ok'; }
+
+    if (metaErr) {
+      msg.textContent = 'Erreur : ' + metaErr.message;
+      msg.className = 'save-msg err';
+      return;
+    }
+
+    // If email changed, update separately (requires confirmation)
+    if (emailChanged) {
+      var { error: emailErr } = await sb.auth.updateUser({ email: newEmail });
+      if (emailErr) {
+        msg.textContent = '✓ Profil enregistré. Erreur email : ' + emailErr.message;
+        msg.className = 'save-msg err';
+      } else {
+        msg.textContent = '✓ Profil enregistré. Un email de confirmation a été envoyé à ' + newEmail;
+        msg.className = 'save-msg ok';
+      }
+    } else {
+      msg.textContent = '✓ Informations mises à jour.';
+      msg.className = 'save-msg ok';
+    }
   }
 
   async function savePassword() {

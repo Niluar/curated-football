@@ -808,7 +808,7 @@
   <a href="index-fr.html" class="nav-lang">🇫🇷</a>
   <div style="display:flex;align-items:center;gap:16px">
     <a href="login.html" id="nav-account" class="nav-account">Se connecter</a>
-    <a href="#" class="nav-sell">Sell a Shirt</a>
+    <a href="sell.html" class="nav-sell">Sell a Shirt</a>
   </div>
 </nav>
 
@@ -1048,7 +1048,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   (function() {
-    var _sb = supabase.createClient('https://pwakudhbkcmsdculjypp.supabase.co', 'sb_publishable_SULbKQTYT9Kb9U_FR-xCBA_o6wLMw04');
+    var _sb = supabase.createClient('https://pwakudhbkcmsdculjypp.supabase.co', 'sb_publishable_SULbKQTYT9Kb9U_FR-xCBA_o6wLMw04', { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
     _sb.auth.getSession().then(function({ data: { session } }) {
       var link = document.getElementById('nav-account');
       if (session && link) {

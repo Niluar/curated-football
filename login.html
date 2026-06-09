@@ -101,7 +101,7 @@
   const SUPABASE_URL = 'https://pwakudhbkcmsdculjypp.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_SULbKQTYT9Kb9U_FR-xCBA_o6wLMw04';
   const { createClient } = supabase;
-  const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+  const sb = createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
 
   // Check if already logged in
   sb.auth.getSession().then(function({ data: { session } }) {
