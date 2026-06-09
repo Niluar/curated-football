@@ -733,6 +733,15 @@
     }
     .nav-lang:hover { color: var(--gold); border-color: var(--gold); }
 
+
+    .nav-account {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase;
+      color: var(--muted); text-decoration: none; transition: color .2s;
+    }
+    .nav-account:hover { color: var(--text); }
+    .nav-account.logged { color: var(--gold); }
+
   </style>
 </head>
 <body>
@@ -748,7 +757,10 @@
     <li><a href="about.html">À propos</a></li>
   </ul>
   <a href="index.html" class="nav-lang">🇬🇧</a>
-  <a href="#" class="nav-sell">Vendre un maillot</a>
+  <div style="display:flex;align-items:center;gap:16px">
+    <a href="login.html" id="nav-account" class="nav-account">Se connecter</a>
+    <a href="#" class="nav-sell">Vendre un maillot</a>
+  </div>
 </nav>
 
 <!-- HERO -->
@@ -984,5 +996,19 @@
       return { next, prev };
     })();
   </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  (function() {
+    var _sb = supabase.createClient('https://pwakudhbkcmsdculjypp.supabase.co', 'sb_publishable_SULbKQTYT9Kb9U_FR-xCBA_o6wLMw04');
+    _sb.auth.getSession().then(function({ data: { session } }) {
+      var link = document.getElementById('nav-account');
+      if (session && link) {
+        link.textContent = session.user.user_metadata.first_name || 'Mon compte';
+        link.href = 'account.html';
+        link.classList.add('logged');
+      }
+    });
+  })();
+</script>
 </body>
 </html>
