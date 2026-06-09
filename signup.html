@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Créer un compte — Curated.football</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Outfit:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--bg:#f0ede9;--white:#fff;--border:#e0dbd4;--text:#141210;--muted:#9a9590;--gold:#b8954a}
+    body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;min-height:100vh;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased}
+    nav{display:flex;align-items:center;justify-content:space-between;padding:20px 48px;border-bottom:1px solid var(--border);background:var(--white)}
+    .logo{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--text);text-decoration:none}
+    .tld{font-family:'IBM Plex Mono',monospace;font-size:.55em;font-weight:400;color:var(--gold)}
+    .nav-link{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);text-decoration:none}
+    .auth-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:48px 20px}
+    .auth-card{background:var(--white);border:1px solid var(--border);width:100%;max-width:420px;padding:48px}
+    .auth-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+    .auth-title{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:600;margin-bottom:32px;line-height:1.1}
+    .field{margin-bottom:18px}
+    .field label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px}
+    .field input{width:100%;padding:13px 16px;border:1px solid var(--border);background:transparent;font-family:'Outfit',sans-serif;font-size:15px;color:var(--text);outline:none;transition:border-color .2s}
+    .field input:focus{border-color:var(--gold)}
+    .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .btn{width:100%;background:var(--gold);color:#fff;border:none;padding:16px;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:opacity .2s;margin-top:8px}
+    .btn:hover{opacity:.88}
+    .btn:disabled{opacity:.4;cursor:default}
+    .err{font-size:13px;color:#c0392b;margin-top:12px;display:none}
+    .err.show{display:block}
+    .auth-foot{text-align:center;font-size:13px;color:var(--muted);margin-top:24px}
+    .auth-foot a{color:var(--gold);text-decoration:none}
+    .success{text-align:center;padding:16px 0;display:none}
+    .success.show{display:block}
+    @media(max-width:600px){nav{padding:16px 20px}.auth-card{padding:32px 20px}.field-row{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="logo">CURATED<span class="tld">.football</span></a>
+  <a href="login.html" class="nav-link">Se connecter</a>
+</nav>
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div id="form-section">
+      <div class="auth-label">Inscription</div>
+      <div class="auth-title">Créer un compte</div>
+      <div class="field field-row">
+        <div><label>Prénom</label><input type="text" id="fn" placeholder="Jean" autocomplete="given-name"></div>
+        <div><label>Nom</label><input type="text" id="ln" placeholder="Dupont" autocomplete="family-name"></div>
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="email" placeholder="toi@email.com" autocomplete="email">
+      </div>
+      <div class="field">
+        <label>Mot de passe</label>
+        <input type="password" id="pwd" placeholder="8 caractères minimum" autocomplete="new-password">
+      </div>
+      <div class="err" id="err"></div>
+      <button class="btn" id="btn" onclick="doSignup()">Créer mon compte</button>
+      <div class="auth-foot">Déjà un compte ? <a href="login.html">Se connecter</a></div>
+    </div>
+    <div class="success" id="success">
+      <div style="font-size:40px;margin-bottom:16px">✉️</div>
+      <div class="auth-title" style="font-size:28px">Vérifie tes emails</div>
+      <p style="color:var(--muted);font-size:14px;margin-top:12px;line-height:1.6">Un lien de confirmation t'a été envoyé.<br>Clique dessus pour activer ton compte.</p>
+    </div>
+  </div>
+</div>
+<script>
+  const SUPABASE_URL = 'https://pwakudhbkcmsdculjypp.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_SULbKQTYT9Kb9U_FR-xCBA_o6wLMw04';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  async function doSignup() {
+    var fn  = document.getElementById('fn').value.trim();
+    var ln  = document.getElementById('ln').value.trim();
+    var em  = document.getElementById('email').value.trim();
+    var pw  = document.getElementById('pwd').value;
+    var err = document.getElementById('err');
+    var btn = document.getElementById('btn');
+    err.classList.remove('show');
+
+    if (!fn || !ln) return show('Prénom et nom requis.');
+    if (!em.includes('@')) return show('Email invalide.');
+    if (pw.length < 8) return show('Mot de passe trop court (8 caractères min.).');
+
+    btn.textContent = 'Création…'; btn.disabled = true;
+
+    var { error } = await sb.auth.signUp({
+      email: em, password: pw,
+      options: { data: { first_name: fn, last_name: ln } }
+    });
+
+    if (error) {
+      btn.textContent = 'Créer mon compte'; btn.disabled = false;
+      return show(error.message);
+    }
+    document.getElementById('form-section').style.display = 'none';
+    document.getElementById('success').classList.add('show');
+  }
+
+  function show(msg) {
+    var e = document.getElementById('err');
+    e.textContent = msg; e.classList.add('show');
+  }
+
+  document.addEventListener('keydown', function(e){ if(e.key==='Enter') doSignup(); });
+</script>
+</body>
+</html>
