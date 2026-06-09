@@ -1049,14 +1049,14 @@
 <script>
   (function() {
     var _sb = supabase.createClient('https://pwakudhbkcmsdculjypp.supabase.co', 'sb_publishable_SULbKQTYT9Kb9U_FR-xCBA_o6wLMw04', { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
-    _sb.auth.getSession().then(function({ data: { session } }) {
-      var link = document.getElementById('nav-account');
-      if (session && link) {
-        link.textContent = session.user.user_metadata.first_name || 'Mon compte';
-        link.href = 'account.html';
-        link.classList.add('logged');
-      }
-    });
+    function updateNav(s) {
+      var l = document.getElementById('nav-account');
+      if (!l) return;
+      if (s) { l.textContent = s.user.user_metadata.first_name || s.user.email.split('@')[0]; l.href = 'account.html'; l.classList.add('logged'); }
+      else { l.textContent = 'Se connecter'; l.href = 'login.html'; }
+    }
+    _sb.auth.getSession().then(function(r){ updateNav(r.data&&r.data.session); });
+    _sb.auth.onAuthStateChange(function(e,s){ updateNav(s); });
   })();
 </script>
 </body>
