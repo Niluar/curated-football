@@ -5,6 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mon compte — Curated.football</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Outfit:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- UI logic — independent of Supabase -->
+  <script>
+    function showTab(id) {
+      var ids = ['overview','profile','orders','listings'];
+      var tabs = document.querySelectorAll('.tab');
+      tabs.forEach(function(t, i) {
+        t.classList.toggle('active', ids[i] === id);
+      });
+      ids.forEach(function(tid) {
+        var el = document.getElementById('tab-' + tid);
+        if (el) el.className = 'tab-content' + (tid === id ? ' show' : '');
+      });
+    }
+  </script>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -15,33 +31,21 @@
     .tld{font-family:'IBM Plex Mono',monospace;font-size:.55em;color:var(--gold)}
     .btn-logout{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;background:none;border:1px solid var(--border);color:var(--muted);padding:9px 18px;cursor:pointer;transition:all .2s}
     .btn-logout:hover{border-color:var(--text);color:var(--text)}
-
     .page{max-width:760px;margin:0 auto;padding:48px 24px}
     .page-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
     .page-title{font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:600;margin-bottom:40px}
-
     .tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:32px}
-    .tab{
-      appearance: none; -webkit-appearance: none;
-      background: none; border: none; border-radius: 0;
-      cursor: pointer; pointer-events: auto;
-      -webkit-tap-highlight-color: rgba(184,149,74,.2);
-      text-align: left;
-      font-family: 'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:14px 24px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s}
+    .tab{appearance:none;-webkit-appearance:none;background:none;border:none;border-bottom:2px solid transparent;border-radius:0;margin-bottom:-1px;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:14px 24px;cursor:pointer;transition:all .2s}
     .tab:hover{color:var(--text)}
     .tab.active{color:var(--text);border-bottom-color:var(--gold)}
-
     .tab-content{display:none}
     .tab-content.show{display:block}
-
     .card{background:var(--white);border:1px solid var(--border);padding:32px;margin-bottom:16px}
     .card-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:20px}
-
     .info-row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--border)}
     .info-row:last-child{border-bottom:none}
     .info-key{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;color:var(--muted)}
     .info-val{font-size:14px;font-weight:500;color:var(--text)}
-
     .field{margin-bottom:18px}
     .field label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px}
     .field input{width:100%;padding:12px 16px;border:1px solid var(--border);background:transparent;font-family:'Outfit',sans-serif;font-size:15px;color:var(--text);outline:none;transition:border-color .2s}
@@ -53,10 +57,8 @@
     .save-msg{font-size:13px;margin-top:12px;display:none}
     .save-msg.ok{color:#2d7d46;display:block}
     .save-msg.err{color:#c0392b;display:block}
-
     .empty{text-align:center;padding:48px 24px;color:var(--muted);font-size:14px;line-height:1.7}
     .btn-browse{display:inline-block;margin-top:16px;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;background:var(--gold);color:#fff;text-decoration:none;padding:14px 28px}
-
     @media(max-width:700px){nav{padding:16px 20px}.page{padding:32px 16px}.field-row{grid-template-columns:1fr}.tabs{overflow-x:auto}.tab{white-space:nowrap;padding:12px 16px}}
   </style>
 </head>
@@ -77,7 +79,6 @@
     <button class="tab" type="button" onclick="showTab('listings')">Mes ventes</button>
   </div>
 
-  <!-- TAB: APERÇU -->
   <div class="tab-content show" id="tab-overview">
     <div class="card">
       <div class="card-label">Informations</div>
@@ -87,7 +88,6 @@
     </div>
   </div>
 
-  <!-- TAB: MON ESPACE -->
   <div class="tab-content" id="tab-profile">
     <div class="card">
       <div class="card-label">Informations personnelles</div>
@@ -95,182 +95,122 @@
         <div><label>Prénom</label><input type="text" id="p-fn" placeholder="Prénom"></div>
         <div><label>Nom</label><input type="text" id="p-ln" placeholder="Nom"></div>
       </div>
-      <div class="field">
-        <label>Email</label>
-        <input type="email" id="p-email" placeholder="Email">
-      </div>
-      <div class="field">
-        <label>Adresse</label>
-        <input type="text" id="p-addr" placeholder="Rue et numéro">
-      </div>
+      <div class="field"><label>Email</label><input type="email" id="p-email" placeholder="Email"></div>
+      <div class="field"><label>Adresse</label><input type="text" id="p-addr" placeholder="Rue et numéro"></div>
       <div class="field field-row">
         <div><label>Code postal</label><input type="text" id="p-zip" placeholder="75001"></div>
         <div><label>Ville</label><input type="text" id="p-city" placeholder="Paris"></div>
       </div>
-      <div class="field">
-        <label>Pays</label>
-        <input type="text" id="p-country" placeholder="France">
-      </div>
-      <button class="btn-save" id="btn-profile" onclick="saveProfile()">Enregistrer</button>
+      <div class="field"><label>Pays</label><input type="text" id="p-country" placeholder="France"></div>
+      <button class="btn-save" onclick="saveProfile()">Enregistrer</button>
       <div class="save-msg" id="profile-msg"></div>
     </div>
-
     <div class="card">
       <div class="card-label">Mot de passe</div>
-      <div class="field">
-        <label>Nouveau mot de passe</label>
-        <input type="password" id="p-pwd1" placeholder="8 caractères minimum">
-      </div>
-      <div class="field">
-        <label>Confirmer</label>
-        <input type="password" id="p-pwd2" placeholder="Répéter le mot de passe">
-      </div>
-      <button class="btn-save" id="btn-pwd" onclick="savePassword()">Changer le mot de passe</button>
+      <div class="field"><label>Nouveau mot de passe</label><input type="password" id="p-pwd1" placeholder="8 caractères minimum"></div>
+      <div class="field"><label>Confirmer</label><input type="password" id="p-pwd2" placeholder="Répéter"></div>
+      <button class="btn-save" onclick="savePassword()">Changer le mot de passe</button>
       <div class="save-msg" id="pwd-msg"></div>
     </div>
   </div>
 
-  <!-- TAB: ACHATS -->
   <div class="tab-content" id="tab-orders">
-    <div class="card">
-      <div class="empty">
-        Aucun achat pour l'instant.
-        <br>
-        <a href="catalogue.html" class="btn-browse">Parcourir le catalogue</a>
-      </div>
-    </div>
+    <div class="card"><div class="empty">Aucun achat.<br><a href="catalogue.html" class="btn-browse">Parcourir le catalogue</a></div></div>
   </div>
 
-  <!-- TAB: VENTES -->
   <div class="tab-content" id="tab-listings">
-    <div class="card">
-      <div class="empty">
-        Aucune mise en vente pour l'instant.
-        <br>
-        <a href="sell.html" class="btn-browse">Vendre un maillot</a>
-      </div>
-    </div>
+    <div class="card"><div class="empty">Aucune vente.<br><a href="sell.html" class="btn-browse">Vendre un maillot</a></div></div>
   </div>
 </div>
 
 <script>
-  const sb = supabase.createClient(
+  var sb = supabase.createClient(
     'https://pwakudhbkcmsdculjypp.supabase.co',
     'sb_publishable_SULbKQTYT9Kb9U_FR-xCBA_o6wLMw04',
-    { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: 'curated-auth' } }
+    { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } }
   );
 
   var currentUser = null;
-  var isCallback = window.location.search.includes('code=') || window.location.hash.includes('access_token=');
 
   function fillUser(u) {
     currentUser = u;
-    var meta = u.user_metadata || {};
-    var fn = meta.first_name || (meta.full_name||meta.name||'').split(' ')[0] || '';
-    var ln = meta.last_name || (meta.full_name||meta.name||'').split(' ').slice(1).join(' ') || '';
-    var name = (fn+' '+ln).trim() || u.email;
+    var m = u.user_metadata || {};
+    var fn = m.first_name || (m.full_name||m.name||'').split(' ')[0] || '';
+    var ln = m.last_name || (m.full_name||m.name||'').split(' ').slice(1).join(' ') || '';
     var since = new Date(u.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
     document.getElementById('welcome').textContent = 'Bonjour'+(fn?', '+fn:'')+'.';
     document.getElementById('ov-email').textContent = u.email;
-    document.getElementById('ov-name').textContent = name;
+    document.getElementById('ov-name').textContent = (fn+' '+ln).trim()||u.email;
     document.getElementById('ov-since').textContent = since;
     document.getElementById('p-fn').value = fn;
     document.getElementById('p-ln').value = ln;
     document.getElementById('p-email').value = u.email;
-    document.getElementById('p-addr').value = meta.address||'';
-    document.getElementById('p-zip').value = meta.zip||'';
-    document.getElementById('p-city').value = meta.city||'';
-    document.getElementById('p-country').value = meta.country||'';
+    document.getElementById('p-addr').value = m.address||'';
+    document.getElementById('p-zip').value = m.zip||'';
+    document.getElementById('p-city').value = m.city||'';
+    document.getElementById('p-country').value = m.country||'';
   }
 
-  // Listen for auth changes — most reliable method
-  sb.auth.onAuthStateChange(function(event, session) {
-    if (session) {
-      fillUser(session.user);
-    } else if (event === 'SIGNED_OUT') {
-      window.location.href = 'login.html';
-    } else if (!isCallback) {
-      // Not a callback, not signed in — redirect after delay
-      setTimeout(function() {
-        if (!currentUser) window.location.href = 'login.html';
-      }, 2500);
+  // Load session
+  sb.auth.getSession().then(function(r) {
+    if (r.data && r.data.session) {
+      fillUser(r.data.session.user);
+    } else {
+      // Give OAuth callback time to process
+      var isCallback = location.search.includes('code=') || location.hash.includes('access_token=');
+      if (!isCallback) {
+        sb.auth.onAuthStateChange(function(e, s) {
+          if (s) fillUser(s.user);
+          else if (e === 'SIGNED_OUT') location.href = 'login.html';
+        });
+        setTimeout(function(){ if (!currentUser) location.href = 'login.html'; }, 3000);
+      } else {
+        sb.auth.onAuthStateChange(function(e, s) {
+          if (s) fillUser(s.user);
+        });
+      }
     }
   });
 
-  function showTab(id) {
-    var tabs = document.querySelectorAll('.tab');
-    var ids = ['overview','profile','orders','listings'];
-    tabs.forEach(function(t, i) {
-      t.classList.toggle('active', ids[i] === id);
-    });
-    ['overview','profile','orders','listings'].forEach(function(tid) {
-      var el = document.getElementById('tab-' + tid);
-      if (el) el.classList.toggle('show', tid === id);
-    });
-  }
-
-
-
   async function saveProfile() {
-    var btn = document.getElementById('btn-profile');
-    var msg = document.getElementById('profile-msg');
+    var btn = event.target; var msg = document.getElementById('profile-msg');
     btn.textContent = 'Enregistrement…'; btn.disabled = true; msg.className = 'save-msg';
-
-    var newEmail = document.getElementById('p-email').value.trim();
-    var emailChanged = currentUser && newEmail !== currentUser.email;
-
-    // Update metadata (no auth required beyond being logged in)
-    var { error } = await sb.auth.updateUser({
-      data: {
-        first_name: document.getElementById('p-fn').value.trim(),
-        last_name:  document.getElementById('p-ln').value.trim(),
-        address:    document.getElementById('p-addr').value.trim(),
-        zip:        document.getElementById('p-zip').value.trim(),
-        city:       document.getElementById('p-city').value.trim(),
-        country:    document.getElementById('p-country').value.trim()
-      }
-    });
-
+    var { error } = await sb.auth.updateUser({ data: {
+      first_name: document.getElementById('p-fn').value.trim(),
+      last_name:  document.getElementById('p-ln').value.trim(),
+      address:    document.getElementById('p-addr').value.trim(),
+      zip:        document.getElementById('p-zip').value.trim(),
+      city:       document.getElementById('p-city').value.trim(),
+      country:    document.getElementById('p-country').value.trim()
+    }});
     btn.textContent = 'Enregistrer'; btn.disabled = false;
-
-    if (error) {
-      msg.textContent = 'Erreur : ' + error.message;
-      msg.className = 'save-msg err';
-      return;
+    msg.textContent = error ? 'Erreur : '+error.message : '✓ Enregistré.';
+    msg.className = 'save-msg ' + (error ? 'err' : 'ok');
+    var ne = document.getElementById('p-email').value.trim();
+    if (!error && currentUser && ne !== currentUser.email) {
+      await sb.auth.updateUser({ email: ne });
+      msg.textContent = '✓ Enregistré. Confirme le changement d\'email dans ta boîte mail.';
     }
-
-    if (emailChanged) {
-      await sb.auth.updateUser({ email: newEmail });
-      msg.textContent = '✓ Profil enregistré. Confirme le changement d'email dans ta boîte mail.';
-    } else {
-      msg.textContent = '✓ Informations mises à jour.';
-    }
-    msg.className = 'save-msg ok';
   }
 
   async function savePassword() {
-    var btn = document.getElementById('btn-pwd');
-    var msg = document.getElementById('pwd-msg');
+    var btn = event.target; var msg = document.getElementById('pwd-msg');
     var p1 = document.getElementById('p-pwd1').value;
     var p2 = document.getElementById('p-pwd2').value;
     msg.className = 'save-msg';
-    if (p1.length < 8) { msg.textContent = 'Mot de passe trop court (8 min.).'; msg.className = 'save-msg err'; return; }
-    if (p1 !== p2) { msg.textContent = 'Les mots de passe ne correspondent pas.'; msg.className = 'save-msg err'; return; }
+    if (p1.length < 8) { msg.textContent = 'Trop court (8 min.).'; msg.className = 'save-msg err'; return; }
+    if (p1 !== p2)     { msg.textContent = 'Ne correspondent pas.'; msg.className = 'save-msg err'; return; }
     btn.textContent = 'Mise à jour…'; btn.disabled = true;
     var { error } = await sb.auth.updateUser({ password: p1 });
     btn.textContent = 'Changer le mot de passe'; btn.disabled = false;
-    if (error) { msg.textContent = error.message; msg.className = 'save-msg err'; }
-    else {
-      msg.textContent = '✓ Mot de passe mis à jour.';
-      msg.className = 'save-msg ok';
-      document.getElementById('p-pwd1').value = '';
-      document.getElementById('p-pwd2').value = '';
-    }
+    msg.textContent = error ? error.message : '✓ Mot de passe mis à jour.';
+    msg.className = 'save-msg ' + (error ? 'err' : 'ok');
+    if (!error) { document.getElementById('p-pwd1').value = ''; document.getElementById('p-pwd2').value = ''; }
   }
 
   async function logout() {
     await sb.auth.signOut();
-    window.location.href = 'index.html';
+    location.href = 'index.html';
   }
 </script>
 </body>
