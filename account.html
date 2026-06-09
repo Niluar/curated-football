@@ -21,7 +21,13 @@
     .page-title{font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:600;margin-bottom:40px}
 
     .tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:32px}
-    .tab{cursor:pointer;pointer-events:auto;-webkit-tap-highlight-color:rgba(184,149,74,.15);font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:14px 24px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s}
+    .tab{
+      appearance: none; -webkit-appearance: none;
+      background: none; border: none; border-radius: 0;
+      cursor: pointer; pointer-events: auto;
+      -webkit-tap-highlight-color: rgba(184,149,74,.2);
+      text-align: left;
+      font-family: 'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:14px 24px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s}
     .tab:hover{color:var(--text)}
     .tab.active{color:var(--text);border-bottom-color:var(--gold)}
 
@@ -65,10 +71,10 @@
   <div class="page-title" id="welcome">Bonjour.</div>
 
   <div class="tabs">
-    <div class="tab active" data-tab="overview">Aperçu</div>
-    <div class="tab" data-tab="profile">Mon espace</div>
-    <div class="tab" data-tab="orders">Mes achats</div>
-    <div class="tab" data-tab="listings">Mes ventes</div>
+    <button class="tab active" data-tab="overview" type="button">Aperçu</button>
+    <button class="tab" data-tab="profile" type="button">Mon espace</button>
+    <button class="tab" data-tab="orders" type="button">Mes achats</button>
+    <button class="tab" data-tab="listings" type="button">Mes ventes</button>
   </div>
 
   <!-- TAB: APERÇU -->
@@ -200,14 +206,21 @@
     });
   }
 
-  // Attach tab listeners after DOM ready
-  document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.tab').forEach(function(t) {
-      t.addEventListener('click', function() {
-        showTab(t.dataset.tab);
+  // Init tabs immediately (script runs after DOM)
+  (function() {
+    var tabs = document.querySelectorAll('.tab');
+    if (tabs.length) {
+      tabs.forEach(function(t) {
+        t.addEventListener('click', function() { showTab(t.dataset.tab); });
       });
-    });
-  });
+    } else {
+      document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.tab').forEach(function(t) {
+          t.addEventListener('click', function() { showTab(t.dataset.tab); });
+        });
+      });
+    }
+  })();
 
   async function saveProfile() {
     var btn = document.getElementById('btn-profile');
