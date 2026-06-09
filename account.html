@@ -21,7 +21,7 @@
     .page-title{font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:600;margin-bottom:40px}
 
     .tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:32px}
-    .tab{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:14px 24px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s}
+    .tab{cursor:pointer;pointer-events:auto;-webkit-tap-highlight-color:rgba(184,149,74,.15);font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:14px 24px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s}
     .tab:hover{color:var(--text)}
     .tab.active{color:var(--text);border-bottom-color:var(--gold)}
 
@@ -65,10 +65,10 @@
   <div class="page-title" id="welcome">Bonjour.</div>
 
   <div class="tabs">
-    <div class="tab active" onclick="showTab('overview')">Aperçu</div>
-    <div class="tab" onclick="showTab('profile')">Mon espace</div>
-    <div class="tab" onclick="showTab('orders')">Mes achats</div>
-    <div class="tab" onclick="showTab('listings')">Mes ventes</div>
+    <div class="tab active" data-tab="overview">Aperçu</div>
+    <div class="tab" data-tab="profile">Mon espace</div>
+    <div class="tab" data-tab="orders">Mes achats</div>
+    <div class="tab" data-tab="listings">Mes ventes</div>
   </div>
 
   <!-- TAB: APERÇU -->
@@ -192,12 +192,22 @@
   });
 
   function showTab(id) {
-    document.querySelectorAll('.tab').forEach(function(t,i){
-      t.classList.toggle('active',['overview','profile','orders','listings'][i]===id);
+    document.querySelectorAll('.tab').forEach(function(t){
+      t.classList.toggle('active', t.dataset.tab === id);
     });
-    document.querySelectorAll('.tab-content').forEach(function(c){ c.classList.remove('show'); });
-    document.getElementById('tab-'+id).classList.add('show');
+    document.querySelectorAll('.tab-content').forEach(function(c){
+      c.classList.toggle('show', c.id === 'tab-' + id);
+    });
   }
+
+  // Attach tab listeners after DOM ready
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.tab').forEach(function(t) {
+      t.addEventListener('click', function() {
+        showTab(t.dataset.tab);
+      });
+    });
+  });
 
   async function saveProfile() {
     var btn = document.getElementById('btn-profile');
