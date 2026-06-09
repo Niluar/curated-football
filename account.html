@@ -76,27 +76,42 @@
     'sb_publishable_SULbKQTYT9Kb9U_FR-xCBA_o6wLMw04'
   );
 
-  // Handle OAuth callback and regular session
-  sb.auth.onAuthStateChange(function(event, session) {
-    if (!session) {
-      // Wait a moment in case OAuth code is being exchanged
-      setTimeout(function() {
-        sb.auth.getSession().then(function({ data: { session: s } }) {
-          if (!s) window.location.href = 'login.html';
-        });
-      }, 1500);
-      return;
-    }
-    var u = session.user;
+  function fillUser(u) {
     var meta = u.user_metadata || {};
     var firstName = meta.first_name || (meta.full_name || meta.name || '').split(' ')[0] || '';
-    var name = meta.full_name || meta.name || ((meta.first_name || '') + ' ' + (meta.last_name || '')).trim() || u.email;
-    var since = new Date(u.created_at).toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' });
-
+    var name = meta.full_name || meta.name || ((meta.first_name||'') + ' ' + (meta.last_name||'')).trim() || u.email;
+    var since = new Date(u.created_at).toLocaleDateString('fr-FR', {day:'numeric',month:'long',year:'numeric'});
     document.getElementById('welcome').textContent = 'Bonjour' + (firstName ? ', ' + firstName : '') + '.';
     document.getElementById('user-email').textContent = u.email;
     document.getElementById('user-name').textContent = name;
     document.getElementById('user-since').textContent = since;
+  }
+
+  // Is this an OAuth callback? Don't redirect while processing
+  var isCallback = window.location.search.includes('code=') || window.location.hash.includes('access_token=');
+  var redirectTimer = null;
+
+  sb.auth.onAuthStateChange(function(event, session) {
+    if (redirectTimer) { clearTimeout(redirectTimer); redirectTimer = null; }
+    if (session) {
+      fillUser(session.user);
+    } else if (event === 'SIGNED_OUT') {
+      window.location.href = 'login.html';
+    }
+  });
+
+  // Initial session check — only redirect if no session AND not a callback
+  sb.auth.getSession().then(function({ data: { session } }) {
+    if (session) {
+      fillUser(session.user);
+    } else if (!isCallback) {
+      // Give onAuthStateChange 3s to fire before giving up
+      redirectTimer = setTimeout(function() {
+        sb.auth.getSession().then(function({ data: { session: s } }) {
+          if (!s) window.location.href = 'login.html';
+        });
+      }, 3000);
+    }
   });
 
   async function logout() {
