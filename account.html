@@ -71,10 +71,10 @@
   <div class="page-title" id="welcome">Bonjour.</div>
 
   <div class="tabs">
-    <button class="tab active" data-tab="overview" type="button">Aperçu</button>
-    <button class="tab" data-tab="profile" type="button">Mon espace</button>
-    <button class="tab" data-tab="orders" type="button">Mes achats</button>
-    <button class="tab" data-tab="listings" type="button">Mes ventes</button>
+    <button class="tab active" type="button" onclick="showTab('overview')">Aperçu</button>
+    <button class="tab" type="button" onclick="showTab('profile')">Mon espace</button>
+    <button class="tab" type="button" onclick="showTab('orders')">Mes achats</button>
+    <button class="tab" type="button" onclick="showTab('listings')">Mes ventes</button>
   </div>
 
   <!-- TAB: APERÇU -->
@@ -198,29 +198,18 @@
   });
 
   function showTab(id) {
-    document.querySelectorAll('.tab').forEach(function(t){
-      t.classList.toggle('active', t.dataset.tab === id);
+    var tabs = document.querySelectorAll('.tab');
+    var ids = ['overview','profile','orders','listings'];
+    tabs.forEach(function(t, i) {
+      t.classList.toggle('active', ids[i] === id);
     });
-    document.querySelectorAll('.tab-content').forEach(function(c){
-      c.classList.toggle('show', c.id === 'tab-' + id);
+    ['overview','profile','orders','listings'].forEach(function(tid) {
+      var el = document.getElementById('tab-' + tid);
+      if (el) el.classList.toggle('show', tid === id);
     });
   }
 
-  // Init tabs immediately (script runs after DOM)
-  (function() {
-    var tabs = document.querySelectorAll('.tab');
-    if (tabs.length) {
-      tabs.forEach(function(t) {
-        t.addEventListener('click', function() { showTab(t.dataset.tab); });
-      });
-    } else {
-      document.addEventListener('DOMContentLoaded', function() {
-        document.querySelectorAll('.tab').forEach(function(t) {
-          t.addEventListener('click', function() { showTab(t.dataset.tab); });
-        });
-      });
-    }
-  })();
+
 
   async function saveProfile() {
     var btn = document.getElementById('btn-profile');
