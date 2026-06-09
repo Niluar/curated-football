@@ -151,60 +151,50 @@
   const sb = supabase.createClient(
     'https://pwakudhbkcmsdculjypp.supabase.co',
     'sb_publishable_SULbKQTYT9Kb9U_FR-xCBA_o6wLMw04',
-    {
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: true,
-        storage: window.localStorage
-      }
-    }
+    { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: 'curated-auth' } }
   );
 
+  var currentUser = null;
   var isCallback = window.location.search.includes('code=') || window.location.hash.includes('access_token=');
-  var redirectTimer = null;
 
   function fillUser(u) {
+    currentUser = u;
     var meta = u.user_metadata || {};
     var fn = meta.first_name || (meta.full_name||meta.name||'').split(' ')[0] || '';
     var ln = meta.last_name || (meta.full_name||meta.name||'').split(' ').slice(1).join(' ') || '';
-    var name = (fn + ' ' + ln).trim() || u.email;
-    var since = new Date(u.created_at).toLocaleDateString('fr-FR', {day:'numeric',month:'long',year:'numeric'});
-
-    document.getElementById('welcome').textContent = 'Bonjour' + (fn ? ', ' + fn : '') + '.';
+    var name = (fn+' '+ln).trim() || u.email;
+    var since = new Date(u.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+    document.getElementById('welcome').textContent = 'Bonjour'+(fn?', '+fn:'')+'.';
     document.getElementById('ov-email').textContent = u.email;
     document.getElementById('ov-name').textContent = name;
     document.getElementById('ov-since').textContent = since;
-
-    // Pre-fill profile form
     document.getElementById('p-fn').value = fn;
     document.getElementById('p-ln').value = ln;
     document.getElementById('p-email').value = u.email;
-    document.getElementById('p-addr').value = meta.address || '';
-    document.getElementById('p-zip').value = meta.zip || '';
-    document.getElementById('p-city').value = meta.city || '';
-    document.getElementById('p-country').value = meta.country || '';
+    document.getElementById('p-addr').value = meta.address||'';
+    document.getElementById('p-zip').value = meta.zip||'';
+    document.getElementById('p-city').value = meta.city||'';
+    document.getElementById('p-country').value = meta.country||'';
   }
 
+  // Listen for auth changes — most reliable method
   sb.auth.onAuthStateChange(function(event, session) {
-    if (redirectTimer) { clearTimeout(redirectTimer); redirectTimer = null; }
-    if (session) { fillUser(session.user); }
-    else if (event === 'SIGNED_OUT') { window.location.href = 'login.html'; }
-  });
-
-  sb.auth.getSession().then(function({ data: { session } }) {
-    if (session) { fillUser(session.user); }
-    else if (!isCallback) {
-      redirectTimer = setTimeout(function() {
-        sb.auth.getSession().then(function({ data: { session: s } }) {
-          if (!s) window.location.href = 'login.html';
-        });
-      }, 3000);
+    if (session) {
+      fillUser(session.user);
+    } else if (event === 'SIGNED_OUT') {
+      window.location.href = 'login.html';
+    } else if (!isCallback) {
+      // Not a callback, not signed in — redirect after delay
+      setTimeout(function() {
+        if (!currentUser) window.location.href = 'login.html';
+      }, 2500);
     }
   });
 
   function showTab(id) {
-    document.querySelectorAll('.tab').forEach(function(t,i){ t.classList.toggle('active', ['overview','profile','orders','listings'][i]===id); });
+    document.querySelectorAll('.tab').forEach(function(t,i){
+      t.classList.toggle('active',['overview','profile','orders','listings'][i]===id);
+    });
     document.querySelectorAll('.tab-content').forEach(function(c){ c.classList.remove('show'); });
     document.getElementById('tab-'+id).classList.add('show');
   }
@@ -214,46 +204,36 @@
     var msg = document.getElementById('profile-msg');
     btn.textContent = 'Enregistrement…'; btn.disabled = true; msg.className = 'save-msg';
 
-    var { data: { session } } = await sb.auth.getSession();
-    if (!session) { window.location.href = 'login.html'; return; }
-
     var newEmail = document.getElementById('p-email').value.trim();
-    var emailChanged = newEmail !== session.user.email;
+    var emailChanged = currentUser && newEmail !== currentUser.email;
 
-    // Always update metadata first
-    var { error: metaErr } = await sb.auth.updateUser({
+    // Update metadata (no auth required beyond being logged in)
+    var { error } = await sb.auth.updateUser({
       data: {
         first_name: document.getElementById('p-fn').value.trim(),
-        last_name: document.getElementById('p-ln').value.trim(),
-        address: document.getElementById('p-addr').value.trim(),
-        zip: document.getElementById('p-zip').value.trim(),
-        city: document.getElementById('p-city').value.trim(),
-        country: document.getElementById('p-country').value.trim()
+        last_name:  document.getElementById('p-ln').value.trim(),
+        address:    document.getElementById('p-addr').value.trim(),
+        zip:        document.getElementById('p-zip').value.trim(),
+        city:       document.getElementById('p-city').value.trim(),
+        country:    document.getElementById('p-country').value.trim()
       }
     });
 
     btn.textContent = 'Enregistrer'; btn.disabled = false;
 
-    if (metaErr) {
-      msg.textContent = 'Erreur : ' + metaErr.message;
+    if (error) {
+      msg.textContent = 'Erreur : ' + error.message;
       msg.className = 'save-msg err';
       return;
     }
 
-    // If email changed, update separately (requires confirmation)
     if (emailChanged) {
-      var { error: emailErr } = await sb.auth.updateUser({ email: newEmail });
-      if (emailErr) {
-        msg.textContent = '✓ Profil enregistré. Erreur email : ' + emailErr.message;
-        msg.className = 'save-msg err';
-      } else {
-        msg.textContent = '✓ Profil enregistré. Un email de confirmation a été envoyé à ' + newEmail;
-        msg.className = 'save-msg ok';
-      }
+      await sb.auth.updateUser({ email: newEmail });
+      msg.textContent = '✓ Profil enregistré. Confirme le changement d'email dans ta boîte mail.';
     } else {
       msg.textContent = '✓ Informations mises à jour.';
-      msg.className = 'save-msg ok';
     }
+    msg.className = 'save-msg ok';
   }
 
   async function savePassword() {
@@ -262,16 +242,18 @@
     var p1 = document.getElementById('p-pwd1').value;
     var p2 = document.getElementById('p-pwd2').value;
     msg.className = 'save-msg';
-
     if (p1.length < 8) { msg.textContent = 'Mot de passe trop court (8 min.).'; msg.className = 'save-msg err'; return; }
     if (p1 !== p2) { msg.textContent = 'Les mots de passe ne correspondent pas.'; msg.className = 'save-msg err'; return; }
-
     btn.textContent = 'Mise à jour…'; btn.disabled = true;
     var { error } = await sb.auth.updateUser({ password: p1 });
     btn.textContent = 'Changer le mot de passe'; btn.disabled = false;
-
     if (error) { msg.textContent = error.message; msg.className = 'save-msg err'; }
-    else { msg.textContent = '✓ Mot de passe mis à jour.'; msg.className = 'save-msg ok'; document.getElementById('p-pwd1').value = ''; document.getElementById('p-pwd2').value = ''; }
+    else {
+      msg.textContent = '✓ Mot de passe mis à jour.';
+      msg.className = 'save-msg ok';
+      document.getElementById('p-pwd1').value = '';
+      document.getElementById('p-pwd2').value = '';
+    }
   }
 
   async function logout() {
