@@ -46,7 +46,7 @@
     .bc .ref{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--muted)}
 
     /* LAYOUT */
-    .product{display:grid;grid-template-columns:1fr 460px;min-height:calc(100vh - 110px)}
+    .product{display:grid;grid-template-columns:1fr minmax(440px,520px);min-height:calc(100vh - 110px)}
 
     /* GALLERY */
     .gallery{position:sticky;top:110px;height:calc(100vh - 110px);background:#c0bdb9;display:flex;flex-direction:column;overflow:hidden;border-right:1px solid var(--border)}
@@ -276,11 +276,30 @@
 
     /* MAX WIDTH INFO CONTENT */
     .block-price, .block, .coa-line {
-      max-width: 640px;
+      max-width: 100%;
     }
     .btn-p, .btn-s, .btn-360 {
-      max-width: 480px;
+      max-width: 100%;
     }
+
+
+    .offer-fields { display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px; }
+    .offer-row label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing:.1em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 6px; }
+    .offer-row input { width: 100%; padding: 12px 16px; border: 1px solid var(--border); background: var(--white); font-size: 15px; color: var(--text); outline: none; transition: border-color .2s; }
+    .offer-row input:focus { border-color: var(--gold); }
+    .offer-feedback { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing:.06em; padding: 10px 0; display: none; }
+    .offer-feedback.success { color: #2d7d46; display: block; }
+    .offer-feedback.error { color: #c0392b; display: block; }
+
+
+    .nav-right { display: flex; align-items: center; gap: 16px; }
+    .nav-account {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase;
+      color: var(--muted); text-decoration: none; transition: color .2s;
+    }
+    .nav-account:hover { color: var(--text); }
+    .nav-account.logged { color: var(--gold); }
 
     /* MOBILE */
     @media(max-width:900px){
@@ -306,6 +325,30 @@
     }
   </style>
 </head>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const _sb = supabase.createClient(
+    'https://pwakudhbkcmsdculjypp.supabase.co',
+    'sb_publishable_SULbKQTYT9Kb9U_FR-xCBA_o6wLMw04'
+  );
+  // Update nav based on auth state
+  _sb.auth.getSession().then(function({ data: { session } }) {
+    var link = document.getElementById('nav-account');
+    if (session && link) {
+      link.textContent = session.user.user_metadata.first_name || 'Mon compte';
+      link.href = 'account.html';
+      link.classList.add('logged');
+    }
+  });
+  // Gate buy button
+  function requireAuth(next) {
+    _sb.auth.getSession().then(function({ data: { session } }) {
+      if (!session) {
+        window.location.href = 'login.html?next=' + encodeURIComponent(next || window.location.pathname);
+      }
+    });
+  }
+</script>
 <body>
 <div class="sticky-price" id="sticky-bar">
   <div class="sp-left">
@@ -325,7 +368,10 @@
     <li><a href="how-it-works.html">Comment ça marche</a></li>
     <li><a href="about.html">À propos</a></li>
   </ul>
-  <a href="#" class="nav-sell">Vendre un maillot</a>
+  <div class="nav-right">
+    <a href="login.html" class="nav-account" id="nav-account">Se connecter</a>
+    <a href="#" class="nav-sell">Vendre un maillot</a>
+  </div>
 </nav>
 
 <div class="bc">
@@ -387,15 +433,23 @@
     <div class="block-price" id="price-anchor">
       <div class="price">€ 290</div>
       <div class="price-note">Frais de port à la charge de l'acheteur</div>
-      <button class="btn-p">Acheter maintenant</button>
+      <button class="btn-p" onclick="requireAuth('2026-0001-1.html')">Acheter maintenant</button>
       <button class="btn-s" id="btn-offer">Faire une offre</button>
       <div class="offer-form" id="offer-form">
-        <label>Votre offre (€)</label>
-        <input type="number" placeholder="ex. 250" min="50" id="offer-input">
-        <div class="offer-note">Le vendeur peut accepter, refuser ou contre-proposer. Pas de messagerie — uniquement le montant.</div>
+        <div class="offer-fields">
+          <div class="offer-row">
+            <label>Votre offre (€)</label>
+            <input type="number" placeholder="ex. 250" min="50" id="offer-input">
+          </div>
+          <div class="offer-row">
+            <label>Votre email</label>
+            <input type="email" placeholder="vous@email.com" id="offer-email">
+          </div>
+        </div>
+        <div class="offer-note">Votre email ne sera pas communiqué au vendeur. Curated.football transmet votre offre et vous répond sous 24h.</div>
         <button class="btn-offer-send" id="btn-offer-send">Envoyer l'offre</button>
+        <div class="offer-feedback" id="offer-feedback"></div>
       </div>
-    </div>
 
     <div class="coa-line">
       <span class="tick">✓</span>
@@ -629,7 +683,7 @@
     });
   }
 
-})();
+  )();
 
     });
     modalClose.addEventListener('click', function() {
