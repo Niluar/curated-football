@@ -60,6 +60,12 @@
     .empty{text-align:center;padding:48px 24px;color:var(--muted);font-size:14px;line-height:1.7}
     .btn-browse{display:inline-block;margin-top:16px;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;background:var(--gold);color:#fff;text-decoration:none;padding:14px 28px}
     @media(max-width:700px){nav{padding:16px 20px}.page{padding:32px 16px}.field-row{grid-template-columns:1fr}.tabs{overflow-x:auto}.tab{white-space:nowrap;padding:12px 16px}}
+
+    /* TOAST */
+    .toast{position:fixed;bottom:24px;right:24px;z-index:500;padding:14px 20px;background:#141210;color:#e8e2d8;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;border-left:3px solid var(--gold);opacity:0;transform:translateY(16px);transition:all .3s;pointer-events:none}
+    .toast.show{opacity:1;transform:translateY(0)}
+    .toast.err{border-left-color:#c0392b}
+
   </style>
 </head>
 <body>
@@ -134,6 +140,9 @@
 
   function fillUser(u) {
     currentUser = u;
+    // Store for instant nav display
+    var n = (u.user_metadata&&(u.user_metadata.first_name||u.user_metadata.full_name||u.user_metadata.name)) || u.email.split('@')[0];
+    try { localStorage.setItem('cf_user', n); } catch(e) {}
     var m = u.user_metadata || {};
     var fn = m.first_name || (m.full_name||m.name||'').split(' ')[0] || '';
     var ln = m.last_name || (m.full_name||m.name||'').split(' ').slice(1).join(' ') || '';
@@ -215,6 +224,7 @@
     btn.textContent = 'Enregistrer'; btn.disabled = false;
     msg.textContent = error ? 'Erreur : ' + error.message : '✓ Informations enregistrées.';
     msg.className = 'save-msg ' + (error ? 'err' : 'ok');
+    showToast(error ? 'Erreur : ' + error.message : '✓ Informations enregistrées.');
 
     var ne = document.getElementById('p-email').value.trim();
     if (!error && currentUser && ne !== currentUser.email) {
@@ -236,13 +246,17 @@
     btn.textContent = 'Changer le mot de passe'; btn.disabled = false;
     msg.textContent = error ? error.message : '✓ Mot de passe mis à jour.';
     msg.className = 'save-msg ' + (error ? 'err' : 'ok');
+    showToast(error ? error.message : '✓ Mot de passe mis à jour.', !!error);
     if (!error) { document.getElementById('p-pwd1').value = ''; document.getElementById('p-pwd2').value = ''; }
   }
 
   async function logout() {
+    try { localStorage.removeItem('cf_user'); } catch(e) {}
     await sb.auth.signOut();
     location.href = 'index.html';
   }
 </script>
+
+<div class="toast" id="toast"></div>
 </body>
 </html>
