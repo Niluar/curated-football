@@ -1067,13 +1067,17 @@
         var n = (s.user.user_metadata&&(s.user.user_metadata.first_name||s.user.user_metadata.full_name||s.user.user_metadata.name))||s.user.email.split('@')[0];
         try { localStorage.setItem('cf_user', n); } catch(e) {}
         l.textContent = n; l.href = 'account.html'; l.classList.add('logged');
-      } else {
-        try { localStorage.removeItem('cf_user'); } catch(e) {}
-        l.textContent = 'Se connecter'; l.href = 'login.html'; l.classList.remove('logged');
       }
     }
-    _sb.auth.getSession().then(function(r){ updateNav(r.data&&r.data.session||null); });
-    _sb.auth.onAuthStateChange(function(e,s){ updateNav(s); });
+    _sb.auth.getSession().then(function(r){ if (r.data&&r.data.session) updateNav(r.data.session); });
+    _sb.auth.onAuthStateChange(function(e,s){
+      if (s) updateNav(s);
+      else if (e === 'SIGNED_OUT') {
+        try { localStorage.removeItem('cf_user'); } catch(err) {}
+        var l = document.getElementById('nav-account');
+        if (l) { l.textContent = 'Se connecter'; l.href = 'login.html'; l.classList.remove('logged'); }
+      }
+    });
   })();
 </script>
 </body>

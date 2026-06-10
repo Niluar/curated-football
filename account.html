@@ -108,14 +108,14 @@
         <div><label>Ville</label><input type="text" id="p-city" placeholder="Paris"></div>
       </div>
       <div class="field"><label>Pays</label><input type="text" id="p-country" placeholder="France"></div>
-      <button class="btn-save" onclick="saveProfile()">Enregistrer</button>
+      <button class="btn-save" id="btn-save-profile" onclick="saveProfile()">Enregistrer</button>
       <div class="save-msg" id="profile-msg"></div>
     </div>
     <div class="card">
       <div class="card-label">Mot de passe</div>
       <div class="field"><label>Nouveau mot de passe</label><input type="password" id="p-pwd1" placeholder="8 caractères minimum"></div>
       <div class="field"><label>Confirmer</label><input type="password" id="p-pwd2" placeholder="Répéter"></div>
-      <button class="btn-save" onclick="savePassword()">Changer le mot de passe</button>
+      <button class="btn-save" id="btn-save-pwd" onclick="savePassword()">Changer le mot de passe</button>
       <div class="save-msg" id="pwd-msg"></div>
     </div>
   </div>
@@ -192,7 +192,7 @@
   });
 
   async function saveProfile() {
-    var btn = event.target;
+    var btn = document.getElementById('btn-save-profile');
     var msg = document.getElementById('profile-msg');
     btn.textContent = 'Enregistrement…'; btn.disabled = true; msg.className = 'save-msg';
 
@@ -235,7 +235,7 @@
 
 
   async function savePassword() {
-    var btn = event.target; var msg = document.getElementById('pwd-msg');
+    var btn = document.getElementById('btn-save-pwd'); var msg = document.getElementById('pwd-msg');
     var p1 = document.getElementById('p-pwd1').value;
     var p2 = document.getElementById('p-pwd2').value;
     msg.className = 'save-msg';
