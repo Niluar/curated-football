@@ -187,45 +187,39 @@
     var msg = document.getElementById('profile-msg');
     btn.textContent = 'Enregistrement…'; btn.disabled = true; msg.className = 'save-msg';
 
-    var token = _accessToken;
-    if (!token) {
-      var r = await sb.auth.getSession();
-      token = r.data && r.data.session ? r.data.session.access_token : null;
-    }
-    if (!token) {
+    // Get session and explicitly re-set it to fix "Auth session missing"
+    var r = await sb.auth.getSession();
+    if (!r.data || !r.data.session) {
       btn.textContent = 'Enregistrer'; btn.disabled = false;
       msg.textContent = 'Session expirée. Reconnecte-toi.';
       msg.className = 'save-msg err';
       return;
     }
+    // Force SDK to recognize the session
+    await sb.auth.setSession({
+      access_token: r.data.session.access_token,
+      refresh_token: r.data.session.refresh_token
+    });
 
-    var meta = {
-      first_name: document.getElementById('p-fn').value.trim(),
-      last_name:  document.getElementById('p-ln').value.trim(),
-      address:    document.getElementById('p-addr').value.trim(),
-      zip:        document.getElementById('p-zip').value.trim(),
-      city:       document.getElementById('p-city').value.trim(),
-      country:    document.getElementById('p-country').value.trim()
-    };
-
-    var resp = await fetch('https://pwakudhbkcmsdculjypp.supabase.co/auth/v1/user', {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + token,
-        'apikey': 'sb_publishable_SULbKQTYT9Kb9U_FR-xCBA_o6wLMw04'
-      },
-      body: JSON.stringify({ data: meta })
+    var { error } = await sb.auth.updateUser({
+      data: {
+        first_name: document.getElementById('p-fn').value.trim(),
+        last_name:  document.getElementById('p-ln').value.trim(),
+        address:    document.getElementById('p-addr').value.trim(),
+        zip:        document.getElementById('p-zip').value.trim(),
+        city:       document.getElementById('p-city').value.trim(),
+        country:    document.getElementById('p-country').value.trim()
+      }
     });
 
     btn.textContent = 'Enregistrer'; btn.disabled = false;
-    if (resp.ok) {
-      msg.textContent = '✓ Informations enregistrées.';
-      msg.className = 'save-msg ok';
-    } else {
-      var e = await resp.json().catch(function(){ return {}; });
-      msg.textContent = 'Erreur : ' + (e.message||resp.status);
-      msg.className = 'save-msg err';
+    msg.textContent = error ? 'Erreur : ' + error.message : '✓ Informations enregistrées.';
+    msg.className = 'save-msg ' + (error ? 'err' : 'ok');
+
+    var ne = document.getElementById('p-email').value.trim();
+    if (!error && currentUser && ne !== currentUser.email) {
+      await sb.auth.updateUser({ email: ne });
+      msg.textContent = '✓ Enregistré. Confirme le changement d'email dans ta boite mail.';
     }
   }
 

@@ -107,14 +107,16 @@
   sb.auth.getSession().then(function({ data: { session } }) {
     if (session) {
       var params = new URLSearchParams(window.location.search);
-      window.location.href = params.get('next') || 'account.html';
+      var next = params.get('next') || sessionStorage.getItem('after_login') || 'account.html';
+      sessionStorage.removeItem('after_login');
+      window.location.href = next;
     }
   });
 
   async function loginWithGoogle() {
     await sb.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.origin + '/account.html' }
+      options: { redirectTo: window.location.origin + '/' + (new URLSearchParams(window.location.search).get('next') || sessionStorage.getItem('after_login') || 'account.html') }
     });
   }
 
