@@ -336,7 +336,7 @@
   _sb.auth.getSession().then(function({ data: { session } }) {
     var link = document.getElementById('nav-account');
     if (session && link) {
-      link.textContent = session.user.user_metadata.first_name || 'Mon compte';
+      link.textContent = 'Mon compte';
       link.href = 'account.html';
       link.classList.add('logged');
     }
@@ -370,7 +370,7 @@
     <li><a href="about.html">À propos</a></li>
   </ul>
   <div class="nav-right">
-    <a href="login.html" class="nav-account" id="nav-account">Se connecter</a>
+    <a href="login.html" class="nav-account" id="nav-account">Mon compte</a>
     <a href="sell.html" class="nav-sell">Vendre un maillot</a>
   </div>
 </nav>
