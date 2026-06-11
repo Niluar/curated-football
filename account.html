@@ -142,7 +142,10 @@ try {
     { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } }
   );
 
+  var _token = null;
+
   function fillUser(session) {
+    _token = session.access_token;
     var u = session.user;
     var m = u.user_metadata || {};
     var full = m.full_name || m.name || '';
@@ -191,19 +194,42 @@ try {
     var btn = this;
     btn.textContent = 'Enregistrement...';
     btn.disabled = true;
-    sb.auth.updateUser({
-      data: {
-        first_name: document.getElementById('p-fn').value.trim(),
-        last_name:  document.getElementById('p-ln').value.trim(),
-        address:    document.getElementById('p-addr').value.trim(),
-        zip:        document.getElementById('p-zip').value.trim(),
-        city:       document.getElementById('p-city').value.trim(),
-        country:    document.getElementById('p-country').value.trim()
+
+    // Get fresh token
+    sb.auth.getSession().then(function(r) {
+      var token = (r.data && r.data.session) ? r.data.session.access_token : _token;
+      if (!token) {
+        btn.textContent = 'Enregistrer'; btn.disabled = false;
+        showToast('Session expirée. Reconnecte-toi.', true);
+        return;
       }
-    }).then(function(r) {
-      btn.textContent = 'Enregistrer';
-      btn.disabled = false;
-      showToast(r.error ? 'Erreur : ' + r.error.message : 'Informations enregistrees.', !!r.error);
+      _token = token;
+      fetch('https://pwakudhbkcmsdculjypp.supabase.co/auth/v1/user', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token,
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3YWt1ZGhia2Ntc2RjdWxqeXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMTY0MzUsImV4cCI6MjA5NjU5MjQzNX0.thdcRB_DJReRN0-0gvEDIPs4YTTQQLH3uTS2QMU0OQQ'
+        },
+        body: JSON.stringify({ data: {
+          first_name: document.getElementById('p-fn').value.trim(),
+          last_name:  document.getElementById('p-ln').value.trim(),
+          address:    document.getElementById('p-addr').value.trim(),
+          zip:        document.getElementById('p-zip').value.trim(),
+          city:       document.getElementById('p-city').value.trim(),
+          country:    document.getElementById('p-country').value.trim()
+        }})
+      }).then(function(resp) {
+        btn.textContent = 'Enregistrer'; btn.disabled = false;
+        if (resp.ok) {
+          showToast('Informations enregistrées.');
+        } else {
+          resp.json().then(function(e){ showToast('Erreur : ' + (e.message||resp.status), true); });
+        }
+      }).catch(function(e) {
+        btn.textContent = 'Enregistrer'; btn.disabled = false;
+        showToast('Erreur réseau : ' + e.message, true);
+      });
     });
   });
 
