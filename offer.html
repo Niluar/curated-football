@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Faire une offre — Curated.football</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Outfit:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--bg:#f0ede9;--white:#fff;--border:#e0dbd4;--text:#141210;--dim:#4a4845;--muted:#9a9590;--gold:#b8954a}
+    body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh}
+    nav{display:flex;align-items:center;justify-content:space-between;padding:20px 48px;border-bottom:1px solid var(--border);background:var(--white)}
+    .logo{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--text);text-decoration:none}
+    .tld{font-family:'IBM Plex Mono',monospace;font-size:.55em;color:var(--gold)}
+
+    .page{max-width:560px;margin:0 auto;padding:56px 24px}
+    .back-link{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:8px;margin-bottom:32px}
+    .back-link:hover{color:var(--text)}
+
+    /* Shirt summary */
+    .shirt-card{background:var(--white);border:1px solid var(--border);padding:24px;display:flex;gap:20px;margin-bottom:32px;align-items:center}
+    .shirt-thumb{width:72px;height:96px;object-fit:cover;border:1px solid var(--border);flex-shrink:0;background:var(--bg)}
+    .shirt-thumb-empty{width:72px;height:96px;background:var(--bg);border:1px solid var(--border);flex-shrink:0}
+    .shirt-info{}
+    .shirt-player{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;margin-bottom:4px}
+    .shirt-meta{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+    .shirt-price{font-size:15px;font-weight:500}
+    .price-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-right:8px}
+
+    /* Form */
+    .form-title{font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:600;margin-bottom:8px}
+    .form-sub{font-size:14px;color:var(--muted);margin-bottom:28px;line-height:1.6}
+    .field{margin-bottom:20px}
+    .field label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px}
+    .field-note{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5}
+
+    .amount-wrap{position:relative}
+    .amount-wrap .currency{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:16px;font-weight:500;color:var(--muted)}
+    .amount-wrap input{width:100%;padding:14px 16px 14px 32px;border:1px solid var(--border);background:var(--white);font-family:'Outfit',sans-serif;font-size:22px;font-weight:600;color:var(--text);outline:none;transition:border-color .2s}
+    .amount-wrap input:focus{border-color:var(--gold)}
+
+    .field textarea{width:100%;padding:13px 16px;border:1px solid var(--border);background:var(--white);font-family:'Outfit',sans-serif;font-size:15px;color:var(--text);outline:none;transition:border-color .2s;resize:none;min-height:100px}
+    .field textarea:focus{border-color:var(--gold)}
+
+    .offer-info{background:rgba(184,149,74,.06);border:1px solid rgba(184,149,74,.2);padding:16px 18px;font-size:13px;color:var(--dim);line-height:1.7;margin-bottom:24px}
+    .offer-info strong{color:var(--gold)}
+
+    .btn-submit{width:100%;background:var(--gold);color:#fff;border:none;padding:16px;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:opacity .2s}
+    .btn-submit:hover{opacity:.88}
+    .btn-submit:disabled{opacity:.4;cursor:default}
+
+    .form-error{font-size:13px;color:#c0392b;margin-top:12px;display:none}
+    .form-error.show{display:block}
+
+    /* Success */
+    .success{display:none;text-align:center;padding:48px 0}
+    .success.show{display:block}
+    .success-icon{font-size:52px;margin-bottom:20px}
+    .success-title{font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:600;margin-bottom:10px}
+    .success-sub{font-size:15px;color:var(--muted);line-height:1.7;max-width:400px;margin:0 auto 28px}
+    .btn-back-cat{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;background:var(--gold);color:#fff;text-decoration:none;padding:14px 28px}
+
+    @media(max-width:600px){nav{padding:16px 20px}.page{padding:32px 16px}}
+  </style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="logo">CURATED<span class="tld">.football</span></a>
+</nav>
+
+<div class="page">
+  <div id="form-wrap">
+    <a href="#" id="back-link" class="back-link">← Retour à la fiche</a>
+
+    <!-- Shirt summary -->
+    <div class="shirt-card">
+      <div class="shirt-thumb-empty" id="shirt-thumb-wrap"></div>
+      <div class="shirt-info">
+        <div class="shirt-player" id="shirt-player">—</div>
+        <div class="shirt-meta" id="shirt-meta">—</div>
+        <div class="shirt-price"><span class="price-label">Prix</span><span id="shirt-price">—</span></div>
+      </div>
+    </div>
+
+    <div class="form-title">Faire une offre</div>
+    <div class="form-sub">Propose ton prix. Le vendeur a 48h pour accepter, refuser ou contre-proposer.</div>
+
+    <div class="offer-info">
+      <strong>Comment ça marche</strong><br>
+      Ton offre est transmise au vendeur. Si elle est acceptée, tu reçois un email de confirmation et tu disposes de 24h pour finaliser l'achat. Aucun prélèvement n'est effectué à ce stade.
+    </div>
+
+    <div class="field">
+      <label>Ton offre *</label>
+      <div class="amount-wrap">
+        <span class="currency">€</span>
+        <input type="number" id="offer-amount" placeholder="0" min="1" step="1">
+      </div>
+      <div class="field-note" id="amount-note">—</div>
+    </div>
+
+    <div class="field">
+      <label>Message au vendeur <span style="color:var(--muted);font-weight:400">(optionnel)</span></label>
+      <textarea id="offer-message" placeholder="Présente-toi, explique ta démarche..."></textarea>
+    </div>
+
+    <div class="form-error" id="form-error"></div>
+
+    <button class="btn-submit" id="btn-submit" onclick="submitOffer()">Envoyer l'offre</button>
+  </div>
+
+  <div class="success" id="success">
+    <div class="success-icon">✓</div>
+    <div class="success-title">Offre envoyée</div>
+    <div class="success-sub" id="success-msg">Ton offre a été transmise. Tu recevras une réponse sous 48h.</div>
+    <a href="catalogue.html" class="btn-back-cat">Voir le catalogue</a>
+  </div>
+</div>
+
+<script>
+var SUPA_URL = 'https://pwakudhbkcmsdculjypp.supabase.co';
+var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3YWt1ZGhia2Ntc2RjdWxqeXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMTY0MzUsImV4cCI6MjA5NjU5MjQzNX0.thdcRB_DJReRN0-0gvEDIPs4YTTQQLH3uTS2QMU0OQQ';
+
+var sb = supabase.createClient(SUPA_URL, SUPA_KEY, {
+  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'implicit' }
+});
+
+var currentUser = null;
+
+// Read URL params
+var params = new URLSearchParams(window.location.search);
+var shirtRef   = params.get('ref')    || '';
+var shirtPlayer= params.get('player') || '';
+var shirtClub  = params.get('club')   || '';
+var shirtComp  = params.get('comp')   || '';
+var shirtPrice = +params.get('price') || 0;
+var shirtPhoto = params.get('photo')  || '';
+
+// Populate shirt info
+document.getElementById('back-link').href = shirtRef ? shirtRef + '.html' : 'catalogue.html';
+document.getElementById('shirt-player').textContent = shirtPlayer || '—';
+document.getElementById('shirt-meta').textContent = [shirtClub, shirtComp].filter(Boolean).join(' · ') || '—';
+document.getElementById('shirt-price').textContent = shirtPrice ? shirtPrice + ' €' : '—';
+
+if (shirtPhoto) {
+  var img = document.createElement('img');
+  img.src = shirtPhoto;
+  img.className = 'shirt-thumb';
+  var wrap = document.getElementById('shirt-thumb-wrap');
+  wrap.parentNode.replaceChild(img, wrap);
+}
+
+if (shirtPrice) {
+  var pct = Math.round(shirtPrice * 0.7);
+  document.getElementById('amount-note').textContent =
+    'Le vendeur a demandé ' + shirtPrice + ' €. Les offres inférieures à ' + pct + ' € (70%) ont peu de chances d\'être acceptées.';
+}
+
+// Auth
+sb.auth.getSession().then(function(r) {
+  if (r.data && r.data.session) {
+    currentUser = r.data.session.user;
+  } else {
+    sessionStorage.setItem('after_login', window.location.href);
+    window.location.href = 'login.html';
+  }
+});
+
+sb.auth.onAuthStateChange(function(event, session) {
+  if (session && !currentUser) currentUser = session.user;
+});
+
+async function submitOffer() {
+  var amount = +document.getElementById('offer-amount').value;
+  var message = document.getElementById('offer-message').value.trim();
+  var err = document.getElementById('form-error');
+  err.className = 'form-error';
+
+  if (!amount || amount < 1) {
+    err.textContent = 'Entre un montant valide.';
+    err.className = 'form-error show';
+    return;
+  }
+  if (shirtPrice && amount > shirtPrice) {
+    err.textContent = 'Ton offre dépasse le prix demandé. Utilise "Acheter maintenant" pour acheter au prix fixe.';
+    err.className = 'form-error show';
+    return;
+  }
+
+  var btn = document.getElementById('btn-submit');
+  btn.textContent = 'Envoi...';
+  btn.disabled = true;
+
+  var { data: { session } } = await sb.auth.getSession();
+  if (!session) {
+    err.textContent = 'Session expirée. Reconnecte-toi.';
+    err.className = 'form-error show';
+    btn.textContent = "Envoyer l'offre";
+    btn.disabled = false;
+    return;
+  }
+
+  var { error } = await sb.from('offers').insert([{
+    shirt_ref: shirtRef,
+    player: shirtPlayer,
+    list_price: shirtPrice || null,
+    buyer_id: session.user.id,
+    buyer_email: session.user.email,
+    amount: amount,
+    message: message || null,
+    status: 'pending'
+  }]);
+
+  if (error) {
+    err.textContent = 'Erreur : ' + error.message;
+    err.className = 'form-error show';
+    btn.textContent = "Envoyer l'offre";
+    btn.disabled = false;
+    return;
+  }
+
+  // Success
+  document.getElementById('form-wrap').style.display = 'none';
+  document.getElementById('success-msg').textContent =
+    'Ton offre de ' + amount + ' € pour le maillot de ' + (shirtPlayer || 'ce joueur') +
+    ' a bien été envoyée. Le vendeur a 48h pour répondre.';
+  document.getElementById('success').className = 'success show';
+}
+</script>
+</body>
+</html>

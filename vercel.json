@@ -3,6 +3,14 @@
   "trailingSlash": false,
   "routes": [
     {
+      "src": "/offer",
+      "dest": "/offer.html"
+    },
+    {
+      "src": "/callback",
+      "dest": "/callback.html"
+    },
+    {
       "src": "/sell",
       "dest": "/sell.html"
     },
