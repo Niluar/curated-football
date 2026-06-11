@@ -79,6 +79,20 @@
     .toast.show{opacity:1;transform:translateY(0)}
     .toast.err{border-left-color:#c0392b}
     @media(max-width:700px){nav{padding:16px 20px}.page{padding:32px 16px}.field-row{grid-template-columns:1fr}}
+
+    .order-card{background:var(--white);border:1px solid var(--border);padding:24px;margin-bottom:12px}
+    .order-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+    .order-player{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600}
+    .order-badge{font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;padding:5px 10px;border:1px solid}
+    .badge-pending{color:#b8954a;border-color:rgba(184,149,74,.3);background:rgba(184,149,74,.06)}
+    .badge-approved{color:#2d7d46;border-color:rgba(45,125,70,.3);background:rgba(45,125,70,.06)}
+    .badge-rejected{color:#c0392b;border-color:rgba(192,57,43,.3);background:rgba(192,57,43,.06)}
+    .badge-live{color:#2d7d46;border-color:rgba(45,125,70,.3);background:rgba(45,125,70,.06)}
+    .order-meta{display:flex;gap:24px;flex-wrap:wrap}
+    .order-meta-item{font-size:13px;color:var(--dim)}
+    .order-meta-item span{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--muted);display:block;margin-bottom:3px}
+    .order-ref{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted)}
+
   </style>
 </head>
 <body>
@@ -127,10 +141,14 @@
     </div>
   </div>
   <div class="tab-content" id="tab-orders">
-    <div class="card"><div class="empty">Aucun achat.<br><a href="catalogue.html" class="btn-browse">Parcourir le catalogue</a></div></div>
+    <div id="orders-loading" class="card"><div class="empty" style="padding:24px">Chargement...</div></div>
+    <div id="orders-list" style="display:none"></div>
+    <div id="orders-empty" class="card" style="display:none"><div class="empty">Aucun achat pour l'instant.<br><a href="catalogue.html" class="btn-browse">Parcourir le catalogue</a></div></div>
   </div>
   <div class="tab-content" id="tab-listings">
-    <div class="card"><div class="empty">Aucune vente.<br><a href="sell.html" class="btn-browse">Vendre un maillot</a></div></div>
+    <div id="listings-loading" class="card"><div class="empty" style="padding:24px">Chargement...</div></div>
+    <div id="listings-list" style="display:none"></div>
+    <div id="listings-empty" class="card" style="display:none"><div class="empty">Aucune mise en vente.<br><a href="sell.html" class="btn-browse">Vendre un maillot</a></div></div>
   </div>
 </div>
 <div class="toast" id="toast"></div>
