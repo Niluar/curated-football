@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mon compte — Curated.football</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Outfit:wght@400;500&display=swap" rel="stylesheet">
-
   <script>
     function showTab(id) {
       var ids = ['overview','profile','orders','listings'];
@@ -26,82 +25,89 @@
       t.classList.add('show');
       setTimeout(function(){ t.classList.remove('show'); }, 3500);
     }
+    function doLogout() {
+      try { localStorage.removeItem('cf_user'); } catch(e) {}
+      try {
+        if(window._sb) {
+          window._sb.auth.signOut().then(function(){
+            window.location.href = 'index.html';
+          }).catch(function(){
+            window.location.href = 'index.html';
+          });
+        } else {
+          window.location.href = 'index.html';
+        }
+      } catch(e) {
+        window.location.href = 'index.html';
+      }
+    }
   </script>
-
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{--bg:#f0ede9;--white:#fff;--border:#e0dbd4;--text:#141210;--dim:#4a4845;--muted:#9a9590;--gold:#b8954a}
+    :root{--bg:#f0ede9;--white:#fff;--border:#e0dbd4;--text:#141210;--muted:#9a9590;--gold:#b8954a}
     body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;-webkit-font-smoothing:antialiased}
     nav{display:flex;align-items:center;justify-content:space-between;padding:20px 48px;border-bottom:1px solid var(--border);background:var(--white)}
     .logo{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--text);text-decoration:none}
     .tld{font-family:'IBM Plex Mono',monospace;font-size:.55em;color:var(--gold)}
-    .btn-logout{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;background:none;border:1px solid var(--border);color:var(--muted);padding:9px 18px;cursor:pointer;transition:all .2s}
+    .btn-logout{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;background:none;border:1px solid var(--border);color:var(--muted);padding:9px 18px;cursor:pointer}
     .btn-logout:hover{border-color:var(--text);color:var(--text)}
     .page{max-width:760px;margin:0 auto;padding:48px 24px}
     .page-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
     .page-title{font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:600;margin-bottom:40px}
-    .tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:32px}
-    .tab{appearance:none;-webkit-appearance:none;background:none;border:none;border-bottom:2px solid transparent;border-radius:0;margin-bottom:-1px;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:14px 24px;cursor:pointer;transition:all .2s}
-    .tab:hover{color:var(--text)}
+    .tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:32px}
+    .tab{appearance:none;-webkit-appearance:none;background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-1px;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:14px 24px;cursor:pointer}
     .tab.active{color:var(--text);border-bottom-color:var(--gold)}
     .tab-content{display:none}
     .tab-content.show{display:block}
     .card{background:var(--white);border:1px solid var(--border);padding:32px;margin-bottom:16px}
     .card-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:20px}
-    .info-row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--border)}
+    .info-row{display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border)}
     .info-row:last-child{border-bottom:none}
-    .info-key{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;color:var(--muted)}
-    .info-val{font-size:14px;font-weight:500;color:var(--text)}
+    .info-key{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted)}
+    .info-val{font-size:14px;font-weight:500}
     .field{margin-bottom:18px}
     .field label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px}
-    .field input{width:100%;padding:12px 16px;border:1px solid var(--border);background:transparent;font-family:'Outfit',sans-serif;font-size:15px;color:var(--text);outline:none;transition:border-color .2s}
+    .field input{width:100%;padding:12px 16px;border:1px solid var(--border);background:transparent;font-family:'Outfit',sans-serif;font-size:15px;color:var(--text);outline:none}
     .field input:focus{border-color:var(--gold)}
     .field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    .btn-save{background:var(--gold);color:#fff;border:none;padding:14px 32px;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:opacity .2s}
-    .btn-save:hover{opacity:.88}
+    .btn-save{background:var(--gold);color:#fff;border:none;padding:14px 32px;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
     .btn-save:disabled{opacity:.4;cursor:default}
     .empty{text-align:center;padding:48px 24px;color:var(--muted);font-size:14px;line-height:1.7}
     .btn-browse{display:inline-block;margin-top:16px;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;background:var(--gold);color:#fff;text-decoration:none;padding:14px 28px}
     .toast{position:fixed;bottom:24px;right:24px;z-index:500;padding:14px 20px;background:#141210;color:#e8e2d8;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;border-left:3px solid var(--gold);opacity:0;transform:translateY(16px);transition:all .3s;pointer-events:none}
     .toast.show{opacity:1;transform:translateY(0)}
     .toast.err{border-left-color:#c0392b}
-    @media(max-width:700px){nav{padding:16px 20px}.page{padding:32px 16px}.field-row{grid-template-columns:1fr}.tabs{overflow-x:auto}.tab{white-space:nowrap;padding:12px 16px}}
+    @media(max-width:700px){nav{padding:16px 20px}.page{padding:32px 16px}.field-row{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
-
 <nav>
   <a href="index.html" class="logo">CURATED<span class="tld">.football</span></a>
-  <button class="btn-logout" id="btn-logout">Se déconnecter</button>
+  <button class="btn-logout" onclick="doLogout()">Se d&eacute;connecter</button>
 </nav>
-
 <div class="page">
   <div class="page-label">Mon compte</div>
   <div class="page-title" id="welcome">Bonjour.</div>
-
   <div class="tabs">
-    <button class="tab active" type="button" onclick="showTab('overview')">Aperçu</button>
+    <button class="tab active" type="button" onclick="showTab('overview')">Aper&ccedil;u</button>
     <button class="tab" type="button" onclick="showTab('profile')">Mon espace</button>
     <button class="tab" type="button" onclick="showTab('orders')">Mes achats</button>
     <button class="tab" type="button" onclick="showTab('listings')">Mes ventes</button>
   </div>
-
   <div class="tab-content show" id="tab-overview">
     <div class="card">
       <div class="card-label">Informations</div>
-      <div class="info-row"><span class="info-key">Email</span><span class="info-val" id="ov-email">—</span></div>
-      <div class="info-row"><span class="info-key">Nom</span><span class="info-val" id="ov-name">—</span></div>
-      <div class="info-row"><span class="info-key">Membre depuis</span><span class="info-val" id="ov-since">—</span></div>
+      <div class="info-row"><span class="info-key">Email</span><span class="info-val" id="ov-email">&mdash;</span></div>
+      <div class="info-row"><span class="info-key">Nom</span><span class="info-val" id="ov-name">&mdash;</span></div>
+      <div class="info-row"><span class="info-key">Membre depuis</span><span class="info-val" id="ov-since">&mdash;</span></div>
     </div>
   </div>
-
   <div class="tab-content" id="tab-profile">
     <div class="card">
       <div class="card-label">Informations personnelles</div>
       <div class="field field-row">
-        <div><label>Prénom</label><input type="text" id="p-fn"></div>
+        <div><label>Pr&eacute;nom</label><input type="text" id="p-fn"></div>
         <div><label>Nom</label><input type="text" id="p-ln"></div>
       </div>
       <div class="field"><label>Email</label><input type="email" id="p-email"></div>
@@ -115,95 +121,76 @@
     </div>
     <div class="card">
       <div class="card-label">Mot de passe</div>
-      <div class="field"><label>Nouveau mot de passe</label><input type="password" id="p-pwd1" placeholder="8 caractères minimum"></div>
+      <div class="field"><label>Nouveau mot de passe</label><input type="password" id="p-pwd1" placeholder="8 caract&egrave;res minimum"></div>
       <div class="field"><label>Confirmer</label><input type="password" id="p-pwd2"></div>
       <button class="btn-save" id="btn-save-pwd">Changer le mot de passe</button>
     </div>
   </div>
-
   <div class="tab-content" id="tab-orders">
     <div class="card"><div class="empty">Aucun achat.<br><a href="catalogue.html" class="btn-browse">Parcourir le catalogue</a></div></div>
   </div>
-
   <div class="tab-content" id="tab-listings">
     <div class="card"><div class="empty">Aucune vente.<br><a href="sell.html" class="btn-browse">Vendre un maillot</a></div></div>
   </div>
 </div>
-
 <div class="toast" id="toast"></div>
-
 <script>
-  var SUPA_URL = 'https://pwakudhbkcmsdculjypp.supabase.co';
-  var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3YWt1ZGhia2Ntc2RjdWxqeXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMTY0MzUsImV4cCI6MjA5NjU5MjQzNX0.thdcRB_DJReRN0-0gvEDIPs4YTTQQLH3uTS2QMU0OQQ';
-
-  var sb = supabase.createClient(SUPA_URL, SUPA_KEY, {
-    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
-  });
-
-  var currentSession = null;
+try {
+  var sb = window._sb = supabase.createClient(
+    'https://pwakudhbkcmsdculjypp.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3YWt1ZGhia2Ntc2RjdWxqeXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMTY0MzUsImV4cCI6MjA5NjU5MjQzNX0.thdcRB_DJReRN0-0gvEDIPs4YTTQQLH3uTS2QMU0OQQ',
+    { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } }
+  );
 
   function fillUser(session) {
-    currentSession = session;
     var u = session.user;
     var m = u.user_metadata || {};
-    var fullName = m.full_name || m.name || '';
-    var fn = m.first_name || fullName.split(' ')[0] || '';
-    var ln = m.last_name  || fullName.split(' ').slice(1).join(' ') || '';
+    var full = m.full_name || m.name || '';
+    var fn = m.first_name || full.split(' ')[0] || '';
+    var ln = m.last_name  || full.split(' ').slice(1).join(' ') || '';
     var since = new Date(u.created_at).toLocaleDateString('fr-FR', {day:'numeric',month:'long',year:'numeric'});
-
-    try { localStorage.setItem('cf_user', fn || u.email.split('@')[0]); } catch(e) {}
-
+    try { localStorage.setItem('cf_user', fn || u.email.split('@')[0]); } catch(x) {}
     document.getElementById('welcome').textContent = 'Bonjour' + (fn ? ', ' + fn : '') + '.';
-    document.getElementById('ov-email').textContent = u.email || '—';
-    document.getElementById('ov-name').textContent  = (fn + ' ' + ln).trim() || u.email || '—';
+    document.getElementById('ov-email').textContent = u.email;
+    document.getElementById('ov-name').textContent  = (fn + ' ' + ln).trim() || u.email;
     document.getElementById('ov-since').textContent = since;
     document.getElementById('p-fn').value      = fn;
     document.getElementById('p-ln').value      = ln;
-    document.getElementById('p-email').value   = u.email || '';
-    document.getElementById('p-addr').value    = m.address || '';
-    document.getElementById('p-zip').value     = m.zip || '';
-    document.getElementById('p-city').value    = m.city || '';
-    document.getElementById('p-country').value = m.country || '';
+    document.getElementById('p-email').value   = u.email;
+    document.getElementById('p-addr').value    = m.address  || '';
+    document.getElementById('p-zip').value     = m.zip      || '';
+    document.getElementById('p-city').value    = m.city     || '';
+    document.getElementById('p-country').value = m.country  || '';
   }
 
-  // Listen for auth changes
   sb.auth.onAuthStateChange(function(event, session) {
     if (session) {
       fillUser(session);
     } else if (event === 'SIGNED_OUT') {
-      try { localStorage.removeItem('cf_user'); } catch(e) {}
+      try { localStorage.removeItem('cf_user'); } catch(x) {}
       window.location.href = 'login.html';
     }
   });
 
-  // Check existing session
   sb.auth.getSession().then(function(r) {
     if (r.data && r.data.session) {
       fillUser(r.data.session);
     } else {
-      var isCallback = location.search.includes('code=') || location.hash.includes('access_token=');
-      if (!isCallback) {
+      var cb = location.search.includes('code=') || location.hash.includes('access_token=');
+      if (!cb) {
         setTimeout(function() {
-          if (!currentSession) window.location.href = 'login.html';
+          sb.auth.getSession().then(function(r2) {
+            if (!r2.data || !r2.data.session) window.location.href = 'login.html';
+          });
         }, 4000);
       }
     }
   });
 
-  // Logout
-  document.getElementById('btn-logout').addEventListener('click', function() {
-    try { localStorage.removeItem('cf_user'); } catch(e) {}
-    sb.auth.signOut().then(function() {
-      window.location.href = 'index.html';
-    });
-  });
-
-  // Save profile
   document.getElementById('btn-save-profile').addEventListener('click', function() {
-    var btn = document.getElementById('btn-save-profile');
-    btn.textContent = 'Enregistrement…';
+    var btn = this;
+    btn.textContent = 'Enregistrement...';
     btn.disabled = true;
-
     sb.auth.updateUser({
       data: {
         first_name: document.getElementById('p-fn').value.trim(),
@@ -216,37 +203,32 @@
     }).then(function(r) {
       btn.textContent = 'Enregistrer';
       btn.disabled = false;
-      if (r.error) {
-        showToast('Erreur : ' + r.error.message, true);
-      } else {
-        showToast('✓ Informations enregistrées.');
-      }
+      showToast(r.error ? 'Erreur : ' + r.error.message : 'Informations enregistrees.', !!r.error);
     });
   });
 
-  // Save password
   document.getElementById('btn-save-pwd').addEventListener('click', function() {
+    var btn = this;
     var p1 = document.getElementById('p-pwd1').value;
     var p2 = document.getElementById('p-pwd2').value;
     if (p1.length < 8) { showToast('Mot de passe trop court (8 min.)', true); return; }
     if (p1 !== p2)     { showToast('Les mots de passe ne correspondent pas', true); return; }
-
-    var btn = document.getElementById('btn-save-pwd');
-    btn.textContent = 'Mise à jour…';
+    btn.textContent = 'Mise a jour...';
     btn.disabled = true;
-
     sb.auth.updateUser({ password: p1 }).then(function(r) {
       btn.textContent = 'Changer le mot de passe';
       btn.disabled = false;
-      if (r.error) {
-        showToast('Erreur : ' + r.error.message, true);
-      } else {
-        showToast('✓ Mot de passe mis à jour.');
+      if (!r.error) {
         document.getElementById('p-pwd1').value = '';
         document.getElementById('p-pwd2').value = '';
       }
+      showToast(r.error ? 'Erreur : ' + r.error.message : 'Mot de passe mis a jour.', !!r.error);
     });
   });
+
+} catch(err) {
+  console.error('Supabase init error:', err);
+}
 </script>
 </body>
 </html>
