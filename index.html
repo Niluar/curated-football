@@ -791,6 +791,9 @@
       color: #141210;
     }
 
+
+    .nav-logout{font-family:"IBM Plex Mono",monospace;font-size:10px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;background:none;border:1px solid var(--border);color:var(--muted);padding:8px 14px;cursor:pointer;}
+    .nav-logout:hover{border-color:var(--text);color:var(--text)}
   </style>
 </head>
 <body>
@@ -807,7 +810,7 @@
   </ul>
   <a href="index-fr.html" class="nav-lang">🇫🇷</a>
   <div style="display:flex;align-items:center;gap:16px">
-    <a href="login.html" id="nav-account" class="nav-account">Se connecter</a>
+    <div id="nav-user" style="display:none;align-items:center;gap:14px"><a href="account.html" id="nav-account" class="nav-account"></a><button class="nav-logout" onclick="doLogout()">Se déconnecter</button></div><a href="login.html" id="nav-login" class="nav-account">Se connecter</a>
     <a href="sell.html" class="nav-sell">Sell a Shirt</a>
   </div>
 </nav>
@@ -1048,36 +1051,49 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   (function() {
-    // Instant nav from cache
+    function doLogout() {
+      try { localStorage.removeItem('cf_user'); } catch(e) {}
+      if (window._navSb) {
+        window._navSb.auth.signOut().then(function(){ location.reload(); });
+      } else { location.reload(); }
+    }
+    window.doLogout = doLogout;
+
+    function updateNav(session) {
+      var nu = document.getElementById('nav-user');
+      var na = document.getElementById('nav-account');
+      var nl = document.getElementById('nav-login');
+      if (session) {
+        var m = session.user.user_metadata || {};
+        var n = m.first_name || m.full_name || m.name || session.user.email.split('@')[0];
+        try { localStorage.setItem('cf_user', n); } catch(x) {}
+        if (nu) nu.style.display = 'flex';
+        if (na) na.textContent = n;
+        if (nl) nl.style.display = 'none';
+      } else {
+        try { localStorage.removeItem('cf_user'); } catch(x) {}
+        if (nu) nu.style.display = 'none';
+        if (nl) nl.style.display = '';
+      }
+    }
+
+    // Instant from cache
     try {
       var cached = localStorage.getItem('cf_user');
       if (cached) {
-        var l = document.getElementById('nav-account');
-        if (l) { l.textContent = cached; l.href = 'account.html'; l.classList.add('logged'); }
+        var nu2 = document.getElementById('nav-user');
+        var na2 = document.getElementById('nav-account');
+        var nl2 = document.getElementById('nav-login');
+        if (nu2) nu2.style.display = 'flex';
+        if (na2) na2.textContent = cached;
+        if (nl2) nl2.style.display = 'none';
       }
     } catch(e) {}
-    // Then verify with Supabase
-    var _sb = supabase.createClient('https://pwakudhbkcmsdculjypp.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3YWt1ZGhia2Ntc2RjdWxqeXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMTY0MzUsImV4cCI6MjA5NjU5MjQzNX0.thdcRB_DJReRN0-0gvEDIPs4YTTQQLH3uTS2QMU0OQQ',
+
+    var _sb = window._navSb = supabase.createClient('https://pwakudhbkcmsdculjypp.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3YWt1ZGhia2Ntc2RjdWxqeXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMTY0MzUsImV4cCI6MjA5NjU5MjQzNX0.thdcRB_DJReRN0-0gvEDIPs4YTTQQLH3uTS2QMU0OQQ',
       { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
-    function updateNav(s) {
-      var l = document.getElementById('nav-account');
-      if (!l) return;
-      if (s) {
-        var n = (s.user.user_metadata&&(s.user.user_metadata.first_name||s.user.user_metadata.full_name||s.user.user_metadata.name))||s.user.email.split('@')[0];
-        try { localStorage.setItem('cf_user', n); } catch(e) {}
-        l.textContent = n; l.href = 'account.html'; l.classList.add('logged');
-      }
-    }
-    _sb.auth.getSession().then(function(r){ if (r.data&&r.data.session) updateNav(r.data.session); });
-    _sb.auth.onAuthStateChange(function(e,s){
-      if (s) updateNav(s);
-      else if (e === 'SIGNED_OUT') {
-        try { localStorage.removeItem('cf_user'); } catch(err) {}
-        var l = document.getElementById('nav-account');
-        if (l) { l.textContent = 'Se connecter'; l.href = 'login.html'; l.classList.remove('logged'); }
-      }
-    });
+    _sb.auth.getSession().then(function(r){ if(r.data&&r.data.session) updateNav(r.data.session); });
+    _sb.auth.onAuthStateChange(function(e,s){ if(s) updateNav(s); else if(e==='SIGNED_OUT') updateNav(null); });
   })();
 </script>
 </body>
