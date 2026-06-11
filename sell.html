@@ -8,46 +8,105 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{--bg:#f0ede9;--white:#fff;--border:#e0dbd4;--text:#141210;--dim:#4a4845;--muted:#9a9590;--gold:#b8954a}
-    body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;-webkit-font-smoothing:antialiased}
-    nav{display:flex;align-items:center;justify-content:space-between;padding:20px 48px;border-bottom:1px solid var(--border);background:var(--white);position:sticky;top:0;z-index:100}
+    :root{--bg:#f0ede9;--white:#fff;--border:#e0dbd4;--text:#141210;--dim:#4a4845;--muted:#9a9590;--gold:#b8954a;--gold-light:rgba(184,149,74,.08)}
+    body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh}
+    nav{display:flex;align-items:center;justify-content:space-between;padding:20px 48px;border-bottom:1px solid var(--border);background:var(--white)}
     .logo{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--text);text-decoration:none}
-    .tld{font-family:'IBM Plex Mono',monospace;font-size:.55em;font-weight:400;color:var(--gold)}
-    .nav-right{display:flex;align-items:center;gap:16px}
+    .tld{font-family:'IBM Plex Mono',monospace;font-size:.55em;color:var(--gold)}
+    .nav-right{display:flex;align-items:center;gap:14px}
     .nav-account{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);text-decoration:none}
+    .nav-account:hover{color:var(--text)}
 
-    .page{max-width:680px;margin:0 auto;padding:64px 24px}
-    .page-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
-    .page-title{font-family:'Cormorant Garamond',serif;font-size:46px;font-weight:600;margin-bottom:12px;line-height:1.1}
-    .page-sub{font-size:15px;color:var(--muted);margin-bottom:48px;line-height:1.7}
+    /* PROGRESS */
+    .progress-wrap{background:var(--white);border-bottom:1px solid var(--border);padding:24px 48px}
+    .progress-steps{display:flex;align-items:center;max-width:700px;margin:0 auto;gap:0}
+    .step-item{display:flex;align-items:center;flex:1}
+    .step-dot{width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:var(--white);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);flex-shrink:0;transition:all .3s}
+    .step-dot.active{border-color:var(--gold);background:var(--gold);color:#fff}
+    .step-dot.done{border-color:var(--gold);background:var(--gold);color:#fff}
+    .step-line{flex:1;height:1px;background:var(--border);transition:background .3s}
+    .step-line.done{background:var(--gold)}
+    .step-label{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:6px;text-align:center}
+    .step-label.active{color:var(--gold)}
+    .step-col{display:flex;flex-direction:column;align-items:center}
 
-    .form-section{background:var(--white);border:1px solid var(--border);padding:40px;margin-bottom:16px}
-    .form-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:20px;display:block}
+    /* CONTENT */
+    .page{max-width:700px;margin:0 auto;padding:48px 24px}
+    .step-title{font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:600;margin-bottom:8px}
+    .step-sub{font-size:14px;color:var(--muted);margin-bottom:32px;line-height:1.6}
+
+    /* FIELDS */
     .field{margin-bottom:20px}
-    .field label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px}
-    .field input, .field select, .field textarea{width:100%;padding:13px 16px;border:1px solid var(--border);background:transparent;font-family:'Outfit',sans-serif;font-size:15px;color:var(--text);outline:none;transition:border-color .2s;resize:none}
-    .field input:focus, .field select:focus, .field textarea:focus{border-color:var(--gold)}
+    .field label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px}
+    .field input,.field select,.field textarea{width:100%;padding:13px 16px;border:1px solid var(--border);background:var(--white);font-family:'Outfit',sans-serif;font-size:15px;color:var(--text);outline:none;transition:border-color .2s;-webkit-appearance:none}
+    .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold)}
+    .field textarea{resize:vertical;min-height:100px}
     .field-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
     .field-note{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5}
 
-    .auth-types{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:0}
-    .auth-type{padding:14px 12px;border:1px solid var(--border);cursor:pointer;text-align:center;transition:all .2s;user-select:none}
-    .auth-type:hover{border-color:var(--gold)}
-    .auth-type.selected{border-color:var(--gold);background:rgba(184,149,74,.06)}
-    .auth-type-name{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text);margin-top:4px}
+    /* AUTH TYPE */
+    .auth-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+    .auth-card{border:1px solid var(--border);padding:20px 16px;cursor:pointer;transition:all .2s;text-align:center;background:var(--white)}
+    .auth-card:hover{border-color:var(--gold)}
+    .auth-card.selected{border-color:var(--gold);background:var(--gold-light)}
+    .auth-icon{font-size:22px;margin-bottom:8px}
+    .auth-name{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--text)}
+    .auth-desc{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.4}
 
-    .btn{width:100%;background:var(--gold);color:#fff;border:none;padding:16px;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:opacity .2s;margin-top:8px}
-    .btn:hover{opacity:.88}
-    .btn:disabled{opacity:.4;cursor:default}
-    .err{font-size:13px;color:#c0392b;margin-top:12px;display:none}
-    .err.show{display:block}
-    .success{text-align:center;padding:48px 24px;display:none}
-    .success.show{display:flex;flex-direction:column;align-items:center;gap:16px}
+    /* PHOTO GRID */
+    .photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+    .photo-slot{aspect-ratio:3/4;border:1px dashed var(--border);background:var(--white);cursor:pointer;position:relative;overflow:hidden;transition:border-color .2s}
+    .photo-slot:hover{border-color:var(--gold)}
+    .photo-slot.filled{border-style:solid;border-color:var(--border)}
+    .photo-slot img{width:100%;height:100%;object-fit:cover;display:block}
+    .photo-slot .slot-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:8px;color:var(--muted)}
+    .photo-slot .slot-num{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em}
+    .photo-slot .slot-icon{font-size:20px}
+    .photo-slot .slot-loading{position:absolute;inset:0;background:rgba(240,237,233,.8);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted)}
+    .photo-slot .slot-remove{position:absolute;top:6px;right:6px;background:rgba(20,18,16,.7);color:#fff;border:none;width:22px;height:22px;border-radius:50%;cursor:pointer;font-size:14px;line-height:22px;text-align:center;display:none}
+    .photo-slot.filled .slot-remove{display:block}
+    .photo-slot .slot-remove:hover{background:rgba(20,18,16,.9)}
+    input[type=file]{display:none}
 
-    .info-bar{background:rgba(184,149,74,.08);border:1px solid rgba(184,149,74,.3);padding:16px 20px;font-size:13px;color:var(--dim);line-height:1.6;margin-bottom:32px}
-    .info-bar strong{color:var(--gold)}
+    /* RECAP */
+    .recap-card{background:var(--white);border:1px solid var(--border);padding:28px;margin-bottom:12px}
+    .recap-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+    .recap-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:14px}
+    .recap-row:last-child{border-bottom:none}
+    .recap-key{color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em}
+    .recap-val{font-weight:500;color:var(--text);text-align:right;max-width:60%}
+    .recap-photos{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+    .recap-thumb{width:60px;height:80px;object-fit:cover;border:1px solid var(--border)}
 
-    @media(max-width:700px){nav{padding:16px 20px}.page{padding:40px 16px}.form-section{padding:24px 20px}.field-row{grid-template-columns:1fr}.auth-types{grid-template-columns:1fr}}
+    /* BUTTONS */
+    .btn-row{display:flex;gap:12px;margin-top:32px}
+    .btn-next{background:var(--gold);color:#fff;border:none;padding:16px 40px;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:opacity .2s;flex:1}
+    .btn-next:hover{opacity:.88}
+    .btn-next:disabled{opacity:.4;cursor:default}
+    .btn-back{background:none;border:1px solid var(--border);color:var(--dim);padding:16px 32px;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:all .2s}
+    .btn-back:hover{border-color:var(--text);color:var(--text)}
+
+    /* SUCCESS */
+    .success{text-align:center;padding:64px 24px;display:none}
+    .success.show{display:block}
+    .success-icon{font-size:56px;margin-bottom:24px}
+    .success-title{font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:600;margin-bottom:12px}
+    .success-sub{font-size:15px;color:var(--muted);line-height:1.7;max-width:440px;margin:0 auto 32px}
+    .btn-catalogue{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;background:var(--gold);color:#fff;text-decoration:none;padding:16px 32px}
+
+    /* ERR */
+    .form-error{font-size:13px;color:#c0392b;margin-top:12px;display:none}
+    .form-error.show{display:block}
+
+    @media(max-width:700px){
+      nav{padding:16px 20px}
+      .progress-wrap{padding:16px 20px}
+      .page{padding:32px 16px}
+      .field-row{grid-template-columns:1fr}
+      .auth-grid{grid-template-columns:1fr}
+      .photo-grid{grid-template-columns:repeat(2,1fr)}
+      .btn-row{flex-direction:column}
+    }
   </style>
 </head>
 <body>
@@ -58,185 +117,454 @@
   </div>
 </nav>
 
-<div class="page">
-  <div id="form-wrap">
-    <div class="page-label">Vendre</div>
-    <h1 class="page-title">Soumettre un maillot</h1>
-    <p class="page-sub">Chaque soumission est examinée sous 24h. Si ton maillot est retenu, il sera mis en ligne avec son contexte complet — joueur, match, certificat.</p>
-
-    <div class="info-bar">
-      <strong>Commission vendeur : 10%</strong> · Frais de port à la charge de l'acheteur · Paiement J+7 après livraison confirmée
-    </div>
-
-    <div class="form-section">
-      <span class="form-label">Le joueur & le match</span>
-      <div class="field field-row">
-        <div><label>Joueur</label><input type="text" id="player" placeholder="ex. Kylian Mbappé"></div>
-        <div><label>Club</label><input type="text" id="club" placeholder="ex. PSG"></div>
-      </div>
-      <div class="field field-row">
-        <div><label>Compétition</label><input type="text" id="competition" placeholder="ex. Ligue 1"></div>
-        <div><label>Date du match</label><input type="date" id="match-date"></div>
-      </div>
-      <div class="field">
-        <label>Score & adversaire</label>
-        <input type="text" id="match" placeholder="ex. PSG 3–1 Marseille">
-      </div>
-    </div>
-
-    <div class="form-section">
-      <span class="form-label">Authentification</span>
-      <div class="field">
-        <label>Type de certificat</label>
-        <div class="auth-types">
-          <div class="auth-type selected" data-val="mws" onclick="selectAuth(this)">
-            <div>🔗</div>
-            <div class="auth-type-name">MWS / Fabricks</div>
-          </div>
-          <div class="auth-type" data-val="coa" onclick="selectAuth(this)">
-            <div>📄</div>
-            <div class="auth-type-name">COA (Fanatics / Beckett)</div>
-          </div>
-          <div class="auth-type" data-val="provenance" onclick="selectAuth(this)">
-            <div>📸</div>
-            <div class="auth-type-name">Provenance directe</div>
-          </div>
-        </div>
-      </div>
-      <div class="field">
-        <label>Lien ou référence du certificat</label>
-        <input type="text" id="cert-ref" placeholder="URL Fabricks, numéro COA, ou description">
-      </div>
-    </div>
-
-    <div class="form-section">
-      <span class="form-label">Prix & informations</span>
-      <div class="field field-row">
-        <div>
-          <label>Prix demandé (€)</label>
-          <input type="number" id="price" placeholder="ex. 250" min="50">
-        </div>
-        <div>
-          <label>État</label>
-          <select id="condition">
-            <option value="">Sélectionner…</option>
-            <option value="unwashed">Non lavé — post-match</option>
-            <option value="washed">Lavé</option>
-          </select>
-        </div>
-      </div>
-      <div class="field">
-        <label>Notes complémentaires</label>
-        <textarea id="notes" rows="3" placeholder="Traces visibles, détails sur la signature, contexte de l'obtention…"></textarea>
-      </div>
-    </div>
-
-    <div class="err" id="err"></div>
-    <button class="btn" id="btn-submit" onclick="submitSell()">Envoyer la soumission</button>
-    <p style="font-size:12px;color:var(--muted);margin-top:16px;text-align:center">Tu recevras une réponse sous 24h à l'adresse associée à ton compte.</p>
-  </div>
-
-  <div class="success" id="success">
-    <div style="font-size:48px">✓</div>
-    <div style="font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600">Soumission reçue</div>
-    <p style="color:var(--muted);font-size:15px;max-width:400px;text-align:center;line-height:1.7">Nous examinons ton maillot sous 24h. Tu recevras une réponse par email avec la décision et les prochaines étapes.</p>
-    <a href="catalogue.html" style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);text-decoration:none;border:1px solid var(--gold);padding:14px 28px;margin-top:8px;transition:all .2s">Voir le catalogue</a>
+<!-- PROGRESS BAR -->
+<div class="progress-wrap" id="progress-wrap">
+  <div class="progress-steps">
+    <div class="step-col"><div class="step-dot active" id="dot-1">1</div><div class="step-label active" id="lbl-1">Maillot</div></div>
+    <div class="step-line" id="line-1"></div>
+    <div class="step-col"><div class="step-dot" id="dot-2">2</div><div class="step-label" id="lbl-2">Auth</div></div>
+    <div class="step-line" id="line-2"></div>
+    <div class="step-col"><div class="step-dot" id="dot-3">3</div><div class="step-label" id="lbl-3">Photos</div></div>
+    <div class="step-line" id="line-3"></div>
+    <div class="step-col"><div class="step-dot" id="dot-4">4</div><div class="step-label" id="lbl-4">Prix</div></div>
+    <div class="step-line" id="line-4"></div>
+    <div class="step-col"><div class="step-dot" id="dot-5">5</div><div class="step-label" id="lbl-5">Recap</div></div>
   </div>
 </div>
 
+<div class="page">
+
+  <!-- STEP 1 -->
+  <div id="step-1">
+    <div class="step-title">Le maillot</div>
+    <div class="step-sub">Décris le match pendant lequel ce maillot a été porté.</div>
+    <div class="field field-row">
+      <div><label>Joueur *</label><input type="text" id="s1-player" placeholder="ex. Oumar Camara"></div>
+      <div><label>Club *</label><input type="text" id="s1-club" placeholder="ex. Vitória SC"></div>
+    </div>
+    <div class="field field-row">
+      <div>
+        <label>Compétition *</label>
+        <select id="s1-competition">
+          <option value="">Sélectionner...</option>
+          <option>Ligue 1</option><option>Ligue 2</option>
+          <option>Premier League</option><option>Championship</option>
+          <option>La Liga</option><option>Serie A</option>
+          <option>Bundesliga</option><option>Eredivisie</option>
+          <option>Liga Portugal</option><option>Pro League</option>
+          <option>Super League (CH)</option><option>Serie B</option>
+          <option>Eerste Divisie</option>
+          <option>Champions League</option><option>Europa League</option>
+          <option>Conference League</option>
+          <option>Copa del Rey</option><option>Coupe de France</option>
+          <option>FA Cup</option><option>Coupe du Roi</option>
+          <option>Autre</option>
+        </select>
+      </div>
+      <div><label>Date du match *</label><input type="date" id="s1-date"></div>
+    </div>
+    <div class="field">
+      <label>Score & adversaire</label>
+      <input type="text" id="s1-score" placeholder="ex. Vitória SC 2–1 Benfica">
+    </div>
+    <div class="field field-row">
+      <div><label>Minutes jouées</label><input type="number" id="s1-mins" placeholder="ex. 90" min="1" max="120"></div>
+      <div><label>Numéro floqué</label><input type="text" id="s1-number" placeholder="ex. 10"></div>
+    </div>
+    <div class="form-error" id="err-1"></div>
+    <div class="btn-row">
+      <button class="btn-next" onclick="goStep(2)">Continuer →</button>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div id="step-2" style="display:none">
+    <div class="step-title">Authentification</div>
+    <div class="step-sub">Comment ce maillot est-il certifié ? Sélectionne le type de preuve disponible.</div>
+    <div class="auth-grid">
+      <div class="auth-card selected" id="auth-mws" onclick="selectAuth('mws')">
+        <div class="auth-icon">🔗</div>
+        <div class="auth-name">MWS / Fabricks</div>
+        <div class="auth-desc">Certificat Match Worn Soccer ou Fabricks</div>
+      </div>
+      <div class="auth-card" id="auth-coa" onclick="selectAuth('coa')">
+        <div class="auth-icon">📄</div>
+        <div class="auth-name">COA</div>
+        <div class="auth-desc">Fanatics, Beckett, PSA ou autre COA reconnu</div>
+      </div>
+      <div class="auth-card" id="auth-prov" onclick="selectAuth('provenance')">
+        <div class="auth-icon">📸</div>
+        <div class="auth-name">Provenance directe</div>
+        <div class="auth-desc">Obtenu directement du joueur ou de son entourage</div>
+      </div>
+    </div>
+    <div class="field">
+      <label id="cert-label">Lien Fabricks ou MWS *</label>
+      <input type="text" id="s2-cert" placeholder="https://app.fabricks.io/claim/...">
+      <div class="field-note" id="cert-note">Colle le lien direct vers ton certificat Fabricks ou MWS.</div>
+    </div>
+    <div class="form-error" id="err-2"></div>
+    <div class="btn-row">
+      <button class="btn-back" onclick="goStep(1)">← Retour</button>
+      <button class="btn-next" onclick="goStep(3)">Continuer →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div id="step-3" style="display:none">
+    <div class="step-title">Photos</div>
+    <div class="step-sub">Jusqu'à 6 photos. Recto, verso, col, numéro, détails, certificat. Au moins 1 photo requise.</div>
+    <div class="photo-grid" id="photo-grid">
+      <!-- generated by JS -->
+    </div>
+    <div class="form-error" id="err-3"></div>
+    <div class="btn-row">
+      <button class="btn-back" onclick="goStep(2)">← Retour</button>
+      <button class="btn-next" onclick="goStep(4)">Continuer →</button>
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div id="step-4" style="display:none">
+    <div class="step-title">Prix & état</div>
+    <div class="step-sub">Fixe ton prix de vente et décris l'état du maillot.</div>
+    <div class="field field-row">
+      <div>
+        <label>Prix demandé (€) *</label>
+        <input type="number" id="s4-price" placeholder="ex. 290" min="50">
+        <div class="field-note">Commission Curated : 10% — tu reçois 90% du prix.</div>
+      </div>
+      <div>
+        <label>État *</label>
+        <select id="s4-condition">
+          <option value="">Sélectionner...</option>
+          <option value="unwashed">Non lavé — post-match</option>
+          <option value="washed">Lavé</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Notes pour l'acheteur</label>
+      <textarea id="s4-notes" placeholder="Traces visibles, contexte d'obtention, signature, dédicace..."></textarea>
+    </div>
+    <div class="form-error" id="err-4"></div>
+    <div class="btn-row">
+      <button class="btn-back" onclick="goStep(3)">← Retour</button>
+      <button class="btn-next" onclick="goStep(5)">Voir le récapitulatif →</button>
+    </div>
+  </div>
+
+  <!-- STEP 5 -->
+  <div id="step-5" style="display:none">
+    <div class="step-title">Récapitulatif</div>
+    <div class="step-sub">Vérifie les informations avant de soumettre ton maillot.</div>
+
+    <div class="recap-card">
+      <div class="recap-label">Le maillot</div>
+      <div class="recap-row"><span class="recap-key">Joueur</span><span class="recap-val" id="r-player">—</span></div>
+      <div class="recap-row"><span class="recap-key">Club</span><span class="recap-val" id="r-club">—</span></div>
+      <div class="recap-row"><span class="recap-key">Compétition</span><span class="recap-val" id="r-comp">—</span></div>
+      <div class="recap-row"><span class="recap-key">Date</span><span class="recap-val" id="r-date">—</span></div>
+      <div class="recap-row"><span class="recap-key">Score</span><span class="recap-val" id="r-score">—</span></div>
+      <div class="recap-row"><span class="recap-key">Minutes</span><span class="recap-val" id="r-mins">—</span></div>
+      <div class="recap-row"><span class="recap-key">Numéro</span><span class="recap-val" id="r-num">—</span></div>
+    </div>
+
+    <div class="recap-card">
+      <div class="recap-label">Authentification</div>
+      <div class="recap-row"><span class="recap-key">Type</span><span class="recap-val" id="r-auth">—</span></div>
+      <div class="recap-row"><span class="recap-key">Référence</span><span class="recap-val" id="r-cert" style="word-break:break-all">—</span></div>
+    </div>
+
+    <div class="recap-card">
+      <div class="recap-label">Photos</div>
+      <div class="recap-photos" id="r-photos"></div>
+    </div>
+
+    <div class="recap-card">
+      <div class="recap-label">Prix & état</div>
+      <div class="recap-row"><span class="recap-key">Prix</span><span class="recap-val" id="r-price">—</span></div>
+      <div class="recap-row"><span class="recap-key">Tu reçois</span><span class="recap-val" id="r-net">—</span></div>
+      <div class="recap-row"><span class="recap-key">État</span><span class="recap-val" id="r-cond">—</span></div>
+      <div class="recap-row"><span class="recap-key">Notes</span><span class="recap-val" id="r-notes">—</span></div>
+    </div>
+
+    <div class="form-error" id="err-5"></div>
+    <div class="btn-row">
+      <button class="btn-back" onclick="goStep(4)">← Retour</button>
+      <button class="btn-next" id="btn-submit" onclick="submitForm()">Soumettre le maillot</button>
+    </div>
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="success" id="success">
+    <div class="success-icon">✓</div>
+    <div class="success-title">Soumission reçue</div>
+    <div class="success-sub">Ton maillot a été soumis pour validation. Tu recevras une réponse sous 24h avec les prochaines étapes.</div>
+    <a href="catalogue.html" class="btn-catalogue">Voir le catalogue</a>
+  </div>
+
+</div><!-- /page -->
+
+<input type="file" id="file-input" accept="image/*">
+
 <script>
-  const sb = supabase.createClient(
-    'https://pwakudhbkcmsdculjypp.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3YWt1ZGhia2Ntc2RjdWxqeXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMTY0MzUsImV4cCI6MjA5NjU5MjQzNX0.thdcRB_DJReRN0-0gvEDIPs4YTTQQLH3uTS2QMU0OQQ',
-    { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } }
-  );
+var SUPA_URL = 'https://pwakudhbkcmsdculjypp.supabase.co';
+var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3YWt1ZGhia2Ntc2RjdWxqeXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMTY0MzUsImV4cCI6MjA5NjU5MjQzNX0.thdcRB_DJReRN0-0gvEDIPs4YTTQQLH3uTS2QMU0OQQ';
 
-  var selectedAuth = 'mws';
+var sb = supabase.createClient(SUPA_URL, SUPA_KEY, {
+  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'implicit' }
+});
 
-  // Show cached name instantly
-  try {
-    var cached = localStorage.getItem('cf_user');
-    var l = document.getElementById('nav-account');
-    if (cached && l) { l.textContent = cached; l.href = 'account.html'; }
-  } catch(e) {}
+var currentUser = null;
+var selectedAuth = 'mws';
+var photos = [null,null,null,null,null,null]; // URLs
+var activeSlot = -1;
 
-  // Verify session
-  sb.auth.getSession().then(function(r) {
-    var session = r.data && r.data.session;
-    if (!session) {
-      sessionStorage.setItem('after_login', 'sell.html');
-      window.location.href = 'login.html?next=sell.html';
-      return;
+// Auth check
+sb.auth.getSession().then(function(r) {
+  if (r.data && r.data.session) {
+    currentUser = r.data.session.user;
+    var n = (currentUser.user_metadata.first_name || currentUser.user_metadata.full_name || currentUser.email.split('@')[0]);
+    try { localStorage.setItem('cf_user', n); } catch(e) {}
+    document.getElementById('nav-account').textContent = n;
+    document.getElementById('nav-account').href = 'account.html';
+  } else {
+    sessionStorage.setItem('after_login', 'sell.html');
+    window.location.href = 'login.html?next=sell.html';
+  }
+});
+
+sb.auth.onAuthStateChange(function(event, session) {
+  if (session && !currentUser) {
+    currentUser = session.user;
+    var n = (currentUser.user_metadata.first_name || currentUser.user_metadata.full_name || currentUser.email.split('@')[0]);
+    document.getElementById('nav-account').textContent = n;
+    document.getElementById('nav-account').href = 'account.html';
+  }
+});
+
+// STEP NAVIGATION
+function goStep(n) {
+  // Validate current step
+  var cur = getCurrentStep();
+  if (n > cur && !validate(cur)) return;
+
+  // Update progress
+  for (var i = 1; i <= 5; i++) {
+    var dot = document.getElementById('dot-' + i);
+    var lbl = document.getElementById('lbl-' + i);
+    dot.className = 'step-dot' + (i < n ? ' done' : i === n ? ' active' : '');
+    dot.textContent = i < n ? '✓' : i;
+    lbl.className = 'step-label' + (i === n ? ' active' : '');
+    if (i < 5) {
+      document.getElementById('line-' + i).className = 'step-line' + (i < n ? ' done' : '');
     }
-    var link = document.getElementById('nav-account');
-    var name = (session.user.user_metadata && session.user.user_metadata.first_name) || session.user.email.split('@')[0];
-    if (link) { link.textContent = name; link.href = 'account.html'; }
+  }
+
+  // Show/hide steps
+  for (var j = 1; j <= 5; j++) {
+    document.getElementById('step-' + j).style.display = j === n ? 'block' : 'none';
+  }
+
+  // Populate recap on step 5
+  if (n === 5) populateRecap();
+
+  window.scrollTo(0, 0);
+}
+
+function getCurrentStep() {
+  for (var i = 1; i <= 5; i++) {
+    if (document.getElementById('step-' + i).style.display !== 'none') return i;
+  }
+  return 1;
+}
+
+// VALIDATION
+function validate(step) {
+  var err = document.getElementById('err-' + step);
+  err.className = 'form-error';
+
+  if (step === 1) {
+    if (!document.getElementById('s1-player').value.trim()) { showErr(1, 'Le joueur est requis.'); return false; }
+    if (!document.getElementById('s1-club').value.trim()) { showErr(1, 'Le club est requis.'); return false; }
+    if (!document.getElementById('s1-competition').value) { showErr(1, 'La compétition est requise.'); return false; }
+    if (!document.getElementById('s1-date').value) { showErr(1, 'La date du match est requise.'); return false; }
+  }
+  if (step === 2) {
+    if (!document.getElementById('s2-cert').value.trim()) { showErr(2, 'La référence du certificat est requise.'); return false; }
+  }
+  if (step === 3) {
+    if (!photos.some(function(p){ return p; })) { showErr(3, 'Au moins une photo est requise.'); return false; }
+  }
+  if (step === 4) {
+    if (!document.getElementById('s4-price').value || +document.getElementById('s4-price').value < 50) { showErr(4, 'Prix minimum : 50 €'); return false; }
+    if (!document.getElementById('s4-condition').value) { showErr(4, "L'état du maillot est requis."); return false; }
+  }
+  return true;
+}
+
+function showErr(step, msg) {
+  var err = document.getElementById('err-' + step);
+  err.textContent = msg;
+  err.className = 'form-error show';
+}
+
+// AUTH TYPE
+function selectAuth(type) {
+  selectedAuth = type;
+  ['mws','coa','prov'].forEach(function(t){
+    document.getElementById('auth-' + t).className = 'auth-card' + (t === type ? ' selected' : '');
   });
+  var labels = { mws: ['Lien Fabricks ou MWS *', 'https://app.fabricks.io/claim/...', 'Colle le lien direct vers ton certificat Fabricks ou MWS.'],
+                 coa: ['Référence COA *', 'Ex. Fanatics Authentic #FA-12345', 'Numéro de certificat Fanatics, Beckett ou PSA.'],
+                 provenance: ['Description de la provenance *', 'Ex. Reçu en main propre après Vitória SC 2–1 Benfica', 'Décris comment tu as obtenu ce maillot directement.'] };
+  var l = labels[type];
+  document.getElementById('cert-label').textContent = l[0];
+  document.getElementById('s2-cert').placeholder = l[1];
+  document.getElementById('cert-note').textContent = l[2];
+}
 
-  // Don't clear nav on null states — only on explicit signout
-  sb.auth.onAuthStateChange(function(e, s) {
-    if (s) {
-      var n = (s.user.user_metadata&&(s.user.user_metadata.first_name||s.user.user_metadata.name))||s.user.email.split('@')[0];
-      try { localStorage.setItem('cf_user', n); } catch(err) {}
+// PHOTO SLOTS
+(function buildSlots() {
+  var grid = document.getElementById('photo-grid');
+  var labels = ['Recto', 'Verso', 'Col / numéro', 'Détail 1', 'Détail 2', 'Certificat'];
+  for (var i = 0; i < 6; i++) {
+    var slot = document.createElement('div');
+    slot.className = 'photo-slot';
+    slot.id = 'slot-' + i;
+    slot.dataset.idx = i;
+    slot.innerHTML = '<div class="slot-empty"><div class="slot-icon">+</div><div class="slot-num">' + labels[i] + '</div></div><button class="slot-remove" onclick="removePhoto(' + i + ')">×</button>';
+    slot.addEventListener('click', function(e) {
+      if (e.target.classList.contains('slot-remove')) return;
+      activeSlot = +this.dataset.idx;
+      document.getElementById('file-input').click();
+    });
+    grid.appendChild(slot);
+  }
+})();
+
+document.getElementById('file-input').addEventListener('change', function() {
+  var file = this.files[0];
+  if (!file || activeSlot < 0) return;
+  this.value = '';
+  uploadPhoto(file, activeSlot);
+});
+
+function uploadPhoto(file, idx) {
+  if (!currentUser) return;
+  var slot = document.getElementById('slot-' + idx);
+  // Show loading
+  var loading = document.createElement('div');
+  loading.className = 'slot-loading';
+  loading.textContent = 'Upload...';
+  slot.appendChild(loading);
+
+  var ext = file.name.split('.').pop();
+  var path = currentUser.id + '/' + Date.now() + '-' + idx + '.' + ext;
+
+  sb.storage.from('shirt-photos').upload(path, file, { cacheControl: '3600', upsert: true })
+    .then(function(r) {
+      slot.removeChild(loading);
+      if (r.error) {
+        showErr(3, 'Erreur upload : ' + r.error.message);
+        return;
+      }
+      var url = SUPA_URL + '/storage/v1/object/public/shirt-photos/' + path;
+      photos[idx] = url;
+      slot.className = 'photo-slot filled';
+      slot.querySelector('.slot-empty').style.display = 'none';
+      var img = document.createElement('img');
+      img.src = url;
+      slot.insertBefore(img, slot.querySelector('.slot-remove'));
+    });
+}
+
+function removePhoto(idx) {
+  photos[idx] = null;
+  var slot = document.getElementById('slot-' + idx);
+  var img = slot.querySelector('img');
+  if (img) slot.removeChild(img);
+  slot.className = 'photo-slot';
+  slot.querySelector('.slot-empty').style.display = '';
+}
+
+// RECAP
+var authLabels = { mws: 'MWS / Fabricks', coa: 'COA (Fanatics / Beckett / PSA)', provenance: 'Provenance directe' };
+var condLabels = { unwashed: 'Non lavé — post-match', washed: 'Lavé' };
+
+function populateRecap() {
+  var price = +document.getElementById('s4-price').value || 0;
+  document.getElementById('r-player').textContent = document.getElementById('s1-player').value;
+  document.getElementById('r-club').textContent = document.getElementById('s1-club').value;
+  document.getElementById('r-comp').textContent = document.getElementById('s1-competition').value;
+  document.getElementById('r-date').textContent = document.getElementById('s1-date').value;
+  document.getElementById('r-score').textContent = document.getElementById('s1-score').value || '—';
+  document.getElementById('r-mins').textContent = document.getElementById('s1-mins').value || '—';
+  document.getElementById('r-num').textContent = document.getElementById('s1-number').value || '—';
+  document.getElementById('r-auth').textContent = authLabels[selectedAuth];
+  document.getElementById('r-cert').textContent = document.getElementById('s2-cert').value;
+  document.getElementById('r-price').textContent = price + ' €';
+  document.getElementById('r-net').textContent = Math.round(price * 0.9) + ' €';
+  document.getElementById('r-cond').textContent = condLabels[document.getElementById('s4-condition').value] || '—';
+  document.getElementById('r-notes').textContent = document.getElementById('s4-notes').value || '—';
+  // Photos
+  var container = document.getElementById('r-photos');
+  container.innerHTML = '';
+  photos.forEach(function(url) {
+    if (url) {
+      var img = document.createElement('img');
+      img.src = url;
+      img.className = 'recap-thumb';
+      container.appendChild(img);
     }
   });
+}
 
-  function selectAuth(el) {
-    document.querySelectorAll('.auth-type').forEach(function(e){ e.classList.remove('selected'); });
-    el.classList.add('selected');
-    selectedAuth = el.dataset.val;
+// SUBMIT
+async function submitForm() {
+  var btn = document.getElementById('btn-submit');
+  btn.textContent = 'Envoi...';
+  btn.disabled = true;
+
+  var { data: { session } } = await sb.auth.getSession();
+  if (!session) {
+    showErr(5, 'Session expirée. Reconnecte-toi.');
+    btn.textContent = 'Soumettre le maillot';
+    btn.disabled = false;
+    return;
   }
 
-  function showErr(msg) {
-    var e = document.getElementById('err');
-    e.textContent = msg; e.classList.add('show');
-    e.scrollIntoView({behavior:'smooth', block:'center'});
+  var { error } = await sb.from('submissions').insert([{
+    user_id: session.user.id,
+    user_email: session.user.email,
+    player: document.getElementById('s1-player').value.trim(),
+    club: document.getElementById('s1-club').value.trim(),
+    competition: document.getElementById('s1-competition').value,
+    match_date: document.getElementById('s1-date').value,
+    match_score: document.getElementById('s1-score').value.trim(),
+    auth_type: selectedAuth,
+    cert_ref: document.getElementById('s2-cert').value.trim(),
+    photos: photos.filter(function(p){ return p; }),
+    price: +document.getElementById('s4-price').value,
+    condition: document.getElementById('s4-condition').value,
+    shirt_number: document.getElementById('s1-number').value.trim(),
+    notes: document.getElementById('s4-notes').value.trim(),
+    status: 'pending'
+  }]);
+
+  if (error) {
+    showErr(5, 'Erreur : ' + error.message);
+    btn.textContent = 'Soumettre le maillot';
+    btn.disabled = false;
+    return;
   }
 
-  async function submitSell() {
-    document.getElementById('err').classList.remove('show');
-    var player = document.getElementById('player').value.trim();
-    var club = document.getElementById('club').value.trim();
-    var competition = document.getElementById('competition').value.trim();
-    var matchDate = document.getElementById('match-date').value;
-    var price = document.getElementById('price').value;
-    var certRef = document.getElementById('cert-ref').value.trim();
-
-    if (!player || !club) return showErr('Joueur et club requis.');
-    if (!competition || !matchDate) return showErr('Compétition et date du match requis.');
-    if (!price || +price < 50) return showErr('Prix minimum : 50 €');
-    if (!certRef) return showErr('Référence du certificat requise.');
-
-    var btn = document.getElementById('btn-submit');
-    btn.textContent = 'Envoi…'; btn.disabled = true;
-
-    var { data: { session } } = await sb.auth.getSession();
-
-    // Store in Supabase
-    var { error } = await sb.from('submissions').insert([{
-      user_id: session.user.id,
-      user_email: session.user.email,
-      player: player,
-      club: club,
-      competition: competition,
-      match_date: matchDate,
-      match_score: document.getElementById('match').value.trim(),
-      price: +price,
-      auth_type: selectedAuth,
-      cert_ref: certRef,
-      condition: document.getElementById('condition').value,
-      notes: document.getElementById('notes').value.trim(),
-      status: 'pending'
-    }]);
-
-    if (error) {
-      btn.textContent = 'Envoyer la soumission'; btn.disabled = false;
-      return showErr('Erreur : ' + error.message + '. Contacte contact@curated.football');
-    }
-
-    document.getElementById('form-wrap').style.display = 'none';
-    document.getElementById('success').classList.add('show');
-  }
+  // Success
+  document.getElementById('progress-wrap').style.display = 'none';
+  for (var i = 1; i <= 5; i++) document.getElementById('step-' + i).style.display = 'none';
+  document.getElementById('success').className = 'success show';
+}
 </script>
 </body>
 </html>
