@@ -143,8 +143,11 @@ try {
   );
 
   var _token = null;
+  var _filled = false;
 
   function fillUser(session) {
+    if (_filled) { _token = session.access_token; return; }
+    _filled = true;
     _token = session.access_token;
     var u = session.user;
     var m = u.user_metadata || {};
@@ -200,14 +203,29 @@ try {
     if (r.data && r.data.session) {
       fillUser(r.data.session);
     } else {
-      var cb = location.search.includes('code=') || location.hash.includes('access_token=');
-      if (!cb) {
-        setTimeout(function() {
-          sb.auth.getSession().then(function(r2) {
-            if (!r2.data || !r2.data.session) window.location.href = 'login.html';
+      // Try reading directly from localStorage (fixes Google OAuth)
+      try {
+        var stored = JSON.parse(localStorage.getItem('sb-pwakudhbkcmsdculjypp-auth-token') || 'null');
+        if (stored && stored.access_token) {
+          sb.auth.setSession({
+            access_token: stored.access_token,
+            refresh_token: stored.refresh_token
+          }).then(function(res) {
+            if (res.data && res.data.session) fillUser(res.data.session);
           });
-        }, 4000);
-      }
+          return;
+        }
+      } catch(x) {}
+      // No session — redirect to login after delay
+      setTimeout(function() {
+        sb.auth.getSession().then(function(r2) {
+          var hasCache = false;
+          try { hasCache = !!localStorage.getItem('cf_user'); } catch(x) {}
+          if (!r2.data || !r2.data.session) {
+            if (!hasCache) window.location.href = 'login.html';
+          }
+        });
+      }, 2000);
     }
   });
 
