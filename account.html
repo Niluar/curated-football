@@ -167,48 +167,65 @@
     keys.forEach(function(k){ console.log(k, ':', localStorage.getItem(k) ? 'present' : 'empty'); });
   } catch(e) {}
 
-  var _accessToken = null;
+  var currentUser = null;
 
-  // Load session
+  function fillUser(u) {
+    if (!u) return;
+    currentUser = u;
+    var m = u.user_metadata || {};
+    var fullName = m.full_name || m.name || '';
+    var fn = m.first_name || fullName.split(' ')[0] || '';
+    var ln = m.last_name  || fullName.split(' ').slice(1).join(' ') || '';
+    var since = new Date(u.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+    try { localStorage.setItem('cf_user', fn || u.email.split('@')[0]); } catch(e) {}
+    var oe = document.getElementById('ov-email');
+    var on = document.getElementById('ov-name');
+    var os = document.getElementById('ov-since');
+    var ow = document.getElementById('welcome');
+    if (oe) oe.textContent = u.email || '—';
+    if (on) on.textContent = (fn+' '+ln).trim() || u.email || '—';
+    if (os) os.textContent = since;
+    if (ow) ow.textContent = 'Bonjour'+(fn?', '+fn:'')+'.';
+    var pf=document.getElementById('p-fn'), pl=document.getElementById('p-ln'),
+        pe=document.getElementById('p-email'), pa=document.getElementById('p-addr'),
+        pz=document.getElementById('p-zip'), pc=document.getElementById('p-city'),
+        py=document.getElementById('p-country');
+    if(pf) pf.value=fn; if(pl) pl.value=ln; if(pe) pe.value=u.email||'';
+    if(pa) pa.value=m.address||''; if(pz) pz.value=m.zip||'';
+    if(pc) pc.value=m.city||''; if(py) py.value=m.country||'';
+  }
+
+  // Auth: onAuthStateChange FIRST (catches OAuth callbacks), then getSession
+  var _redirectTimer = null;
+
+  sb.auth.onAuthStateChange(function(event, session) {
+    if (session) {
+      if (_redirectTimer) { clearTimeout(_redirectTimer); _redirectTimer = null; }
+      fillUser(session.user);
+    } else if (event === 'SIGNED_OUT') {
+      try { localStorage.removeItem('cf_user'); } catch(e) {}
+      location.href = 'login.html';
+    }
+  });
+
   sb.auth.getSession().then(function(r) {
     if (r.data && r.data.session) {
-      _accessToken = r.data.session.access_token;
       fillUser(r.data.session.user);
     } else {
-      // Give OAuth callback time to process
       var isCallback = location.search.includes('code=') || location.hash.includes('access_token=');
       if (!isCallback) {
-        sb.auth.onAuthStateChange(function(e, s) {
-          if (s) fillUser(s.user);
-          else if (e === 'SIGNED_OUT') location.href = 'login.html';
-        });
-        setTimeout(function(){ if (!currentUser) location.href = 'login.html'; }, 3000);
-      } else {
-        sb.auth.onAuthStateChange(function(e, s) {
-          if (s) { _accessToken = s.access_token; fillUser(s.user); }
-        });
+        _redirectTimer = setTimeout(function() {
+          if (!currentUser) location.href = 'login.html';
+        }, 4000);
       }
     }
   });
 
-  async function saveProfile() {
+    async function saveProfile() {
     var btn = document.getElementById('btn-save-profile');
     var msg = document.getElementById('profile-msg');
-    btn.textContent = 'Enregistrement…'; btn.disabled = true; msg.className = 'save-msg';
-
-    // Get session and explicitly re-set it to fix "Auth session missing"
-    var r = await sb.auth.getSession();
-    if (!r.data || !r.data.session) {
-      btn.textContent = 'Enregistrer'; btn.disabled = false;
-      msg.textContent = 'Session expirée. Reconnecte-toi.';
-      msg.className = 'save-msg err';
-      return;
-    }
-    // Force SDK to recognize the session
-    await sb.auth.setSession({
-      access_token: r.data.session.access_token,
-      refresh_token: r.data.session.refresh_token
-    });
+    if (btn) { btn.textContent = 'Enregistrement…'; btn.disabled = true; }
+    if (msg) msg.className = 'save-msg';
 
     var { error } = await sb.auth.updateUser({
       data: {
@@ -221,15 +238,18 @@
       }
     });
 
-    btn.textContent = 'Enregistrer'; btn.disabled = false;
-    msg.textContent = error ? 'Erreur : ' + error.message : '✓ Informations enregistrées.';
-    msg.className = 'save-msg ' + (error ? 'err' : 'ok');
-    showToast(error ? 'Erreur : ' + error.message : '✓ Informations enregistrées.');
+    if (btn) { btn.textContent = 'Enregistrer'; btn.disabled = false; }
+    var ok = !error;
+    var text = ok ? '✓ Informations enregistrées.' : 'Erreur : ' + error.message;
+    if (msg) { msg.textContent = text; msg.className = 'save-msg ' + (ok ? 'ok' : 'err'); }
+    showToast(text, !ok);
 
-    var ne = document.getElementById('p-email').value.trim();
-    if (!error && currentUser && ne !== currentUser.email) {
-      await sb.auth.updateUser({ email: ne });
-      msg.textContent = '✓ Enregistré. Confirme le changement d'email dans ta boite mail.';
+    if (ok) {
+      var ne = document.getElementById('p-email').value.trim();
+      if (currentUser && ne !== currentUser.email) {
+        await sb.auth.updateUser({ email: ne });
+        showToast('✓ Confirme le changement d'email dans ta boite.');
+      }
     }
   }
 
