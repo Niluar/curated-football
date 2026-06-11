@@ -274,6 +274,12 @@
     try { localStorage.removeItem('cf_user'); } catch(e) {}
     await sb.auth.signOut();
     location.href = 'index.html';
+  } catch(e) {}
+    await sb.auth.signOut();
+    location.href = 'index.html';
+  } catch(e) {}
+    await sb.auth.signOut();
+    location.href = 'index.html';
   }
 </script>
 
