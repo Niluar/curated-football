@@ -168,9 +168,26 @@ try {
 
   sb.auth.onAuthStateChange(function(event, session) {
     if (session) {
+      _token = session.access_token;
+      // Force SDK to persist the session (fixes Google OAuth)
+      if (event === 'SIGNED_IN') {
+        sb.auth.setSession({
+          access_token: session.access_token,
+          refresh_token: session.refresh_token
+        }).catch(function(){});
+        // Also save manually as backup
+        try {
+          localStorage.setItem('cf_session_backup', JSON.stringify({
+            access_token: session.access_token,
+            refresh_token: session.refresh_token,
+            expires_at: session.expires_at
+          }));
+        } catch(x) {}
+      }
       fillUser(session);
     } else if (event === 'SIGNED_OUT') {
       try { localStorage.removeItem('cf_user'); } catch(x) {}
+      try { localStorage.removeItem('cf_session_backup'); } catch(x) {}
       window.location.href = 'login.html';
     }
   });
@@ -197,7 +214,18 @@ try {
 
     // Get fresh token
     sb.auth.getSession().then(function(r) {
-      var token = (r.data && r.data.session) ? r.data.session.access_token : _token;
+      var token = null;
+      if (r.data && r.data.session) {
+        token = r.data.session.access_token;
+      } else if (_token) {
+        token = _token;
+      } else {
+        // Try backup session
+        try {
+          var backup = JSON.parse(localStorage.getItem('cf_session_backup') || 'null');
+          if (backup && backup.access_token) token = backup.access_token;
+        } catch(x) {}
+      }
       if (!token) {
         btn.textContent = 'Enregistrer'; btn.disabled = false;
         showToast('Session expirée. Reconnecte-toi.', true);

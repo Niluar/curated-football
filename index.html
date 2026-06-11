@@ -1098,15 +1098,22 @@
         var n = m.first_name || m.full_name || m.name || s.user.email.split('@')[0];
         showLoggedIn(n);
       } else {
-        // No session — only hide if no cache (don't remove cache here)
-        var cached2 = '';
-        try { cached2 = localStorage.getItem('cf_user') || ''; } catch(e) {}
-        if (!cached2) {
-          var nu = document.getElementById('nav-user');
-          var nl = document.getElementById('nav-login');
-          if (nu) nu.style.display = 'none';
-          if (nl) nl.style.display = '';
-        }
+        // Try to restore from backup session (fixes Google OAuth persistence)
+        try {
+          var backup = JSON.parse(localStorage.getItem('cf_session_backup') || 'null');
+          if (backup && backup.access_token) {
+            _sb.auth.setSession({
+              access_token: backup.access_token,
+              refresh_token: backup.refresh_token
+            }).then(function(res) {
+              if (res.data && res.data.session) {
+                var m2 = res.data.session.user.user_metadata || {};
+                var n2 = m2.first_name || m2.full_name || m2.name || res.data.session.user.email.split('@')[0];
+                showLoggedIn(n2);
+              }
+            }).catch(function(){});
+          }
+        } catch(e) {}
       }
     });
 
