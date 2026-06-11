@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Auth Debug</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body{font-family:monospace;padding:24px;background:#f0ede9}
+    pre{background:#141210;color:#e8e2d8;padding:16px;overflow-x:auto;font-size:12px;white-space:pre-wrap}
+    h3{margin:16px 0 8px;color:#b8954a}
+    button{background:#b8954a;color:#fff;border:none;padding:10px 20px;cursor:pointer;font-family:monospace;margin:4px}
+  </style>
+</head>
+<body>
+<h2>Auth Debug</h2>
+
+<button onclick="checkLS()">1. Voir localStorage</button>
+<button onclick="checkSession()">2. getSession()</button>
+<button onclick="loginGoogle()">3. Login Google</button>
+<button onclick="clearAll()">4. Clear tout</button>
+
+<h3>localStorage keys:</h3>
+<pre id="ls-out">—</pre>
+
+<h3>getSession() result:</h3>
+<pre id="session-out">—</pre>
+
+<h3>URL actuelle:</h3>
+<pre id="url-out"></pre>
+
+<script>
+  document.getElementById('url-out').textContent = window.location.href;
+
+  var sb = supabase.createClient('https://pwakudhbkcmsdculjypp.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3YWt1ZGhia2Ntc2RjdWxqeXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMTY0MzUsImV4cCI6MjA5NjU5MjQzNX0.thdcRB_DJReRN0-0gvEDIPs4YTTQQLH3uTS2QMU0OQQ', {
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+  });
+
+  // Auto-check on load
+  setTimeout(checkAll, 500);
+
+  function checkAll() {
+    checkLS();
+    checkSession();
+  }
+
+  function checkLS() {
+    var out = '';
+    for (var i = 0; i < localStorage.length; i++) {
+      var k = localStorage.key(i);
+      var v = localStorage.getItem(k);
+      out += k + '\n  = ' + (v && v.length > 100 ? v.substring(0,100)+'...' : v) + '\n\n';
+    }
+    document.getElementById('ls-out').textContent = out || '(vide)';
+  }
+
+  async function checkSession() {
+    var r = await sb.auth.getSession();
+    var out = JSON.stringify(r.data, null, 2);
+    if (r.error) out += '\nERROR: ' + r.error.message;
+    document.getElementById('session-out').textContent = out;
+  }
+
+  function loginGoogle() {
+    sb.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin + '/debug-auth.html' }
+    });
+  }
+
+  function clearAll() {
+    for (var i = localStorage.length - 1; i >= 0; i--) {
+      localStorage.removeItem(localStorage.key(i));
+    }
+    checkLS();
+  }
+
+  // Listen for auth changes
+  sb.auth.onAuthStateChange(function(event, session) {
+    var info = 'Event: ' + event;
+    if (session) info += '\nUser: ' + session.user.email + '\nToken: ' + session.access_token.substring(0,20) + '...';
+    document.getElementById('session-out').textContent = info;
+    checkLS();
+  });
+</script>
+</body>
+</html>
