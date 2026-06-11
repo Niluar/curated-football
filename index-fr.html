@@ -1051,49 +1051,73 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   (function() {
-    function doLogout() {
+    window.doLogout = function() {
       try { localStorage.removeItem('cf_user'); } catch(e) {}
       if (window._navSb) {
-        window._navSb.auth.signOut().then(function(){ location.reload(); });
-      } else { location.reload(); }
-    }
-    window.doLogout = doLogout;
+        window._navSb.auth.signOut().then(function(){
+          showLoggedOut();
+        });
+      } else {
+        showLoggedOut();
+      }
+    };
 
-    function updateNav(session) {
+    function showLoggedIn(name) {
+      try { localStorage.setItem('cf_user', name); } catch(e) {}
       var nu = document.getElementById('nav-user');
       var na = document.getElementById('nav-account');
       var nl = document.getElementById('nav-login');
-      if (session) {
-        var m = session.user.user_metadata || {};
-        var n = m.first_name || m.full_name || m.name || session.user.email.split('@')[0];
-        try { localStorage.setItem('cf_user', n); } catch(x) {}
-        if (nu) nu.style.display = 'flex';
-        if (na) na.textContent = n;
-        if (nl) nl.style.display = 'none';
-      } else {
-        try { localStorage.removeItem('cf_user'); } catch(x) {}
-        if (nu) nu.style.display = 'none';
-        if (nl) nl.style.display = '';
-      }
+      if (nu) nu.style.display = 'flex';
+      if (na) na.textContent = name;
+      if (nl) nl.style.display = 'none';
     }
 
-    // Instant from cache
+    function showLoggedOut() {
+      try { localStorage.removeItem('cf_user'); } catch(e) {}
+      var nu = document.getElementById('nav-user');
+      var nl = document.getElementById('nav-login');
+      if (nu) nu.style.display = 'none';
+      if (nl) nl.style.display = '';
+      window.location.href = 'index.html';
+    }
+
+    // Show cached name instantly (no flicker)
     try {
       var cached = localStorage.getItem('cf_user');
-      if (cached) {
-        var nu2 = document.getElementById('nav-user');
-        var na2 = document.getElementById('nav-account');
-        var nl2 = document.getElementById('nav-login');
-        if (nu2) nu2.style.display = 'flex';
-        if (na2) na2.textContent = cached;
-        if (nl2) nl2.style.display = 'none';
-      }
+      if (cached) showLoggedIn(cached);
     } catch(e) {}
 
-    var _sb = window._navSb = supabase.createClient('https://pwakudhbkcmsdculjypp.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3YWt1ZGhia2Ntc2RjdWxqeXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMTY0MzUsImV4cCI6MjA5NjU5MjQzNX0.thdcRB_DJReRN0-0gvEDIPs4YTTQQLH3uTS2QMU0OQQ',
+    // Verify with Supabase in background
+    var _sb = window._navSb = supabase.createClient('https://pwakudhbkcmsdculjypp.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3YWt1ZGhia2Ntc2RjdWxqeXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMTY0MzUsImV4cCI6MjA5NjU5MjQzNX0.thdcRB_DJReRN0-0gvEDIPs4YTTQQLH3uTS2QMU0OQQ',
       { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
-    _sb.auth.getSession().then(function(r){ if(r.data&&r.data.session) updateNav(r.data.session); });
-    _sb.auth.onAuthStateChange(function(e,s){ if(s) updateNav(s); else if(e==='SIGNED_OUT') updateNav(null); });
+
+    _sb.auth.getSession().then(function(r) {
+      if (r.data && r.data.session) {
+        var s = r.data.session;
+        var m = s.user.user_metadata || {};
+        var n = m.first_name || m.full_name || m.name || s.user.email.split('@')[0];
+        showLoggedIn(n);
+      } else {
+        // No session — only hide if no cache (don't remove cache here)
+        var cached2 = '';
+        try { cached2 = localStorage.getItem('cf_user') || ''; } catch(e) {}
+        if (!cached2) {
+          var nu = document.getElementById('nav-user');
+          var nl = document.getElementById('nav-login');
+          if (nu) nu.style.display = 'none';
+          if (nl) nl.style.display = '';
+        }
+      }
+    });
+
+    // Only react to explicit SIGNED_IN — never to SIGNED_OUT here
+    _sb.auth.onAuthStateChange(function(event, session) {
+      if (session && event === 'SIGNED_IN') {
+        var m = session.user.user_metadata || {};
+        var n = m.first_name || m.full_name || m.name || session.user.email.split('@')[0];
+        showLoggedIn(n);
+      }
+    });
   })();
 </script>
 </body>
