@@ -329,6 +329,110 @@ try {
     });
   });
 
+  // ── STATUS HELPERS ─────────────────────────────────────────
+  var statusLabels = {
+    pending:'En validation', approved:'Approuvé', rejected:'Refusé', live:'En ligne',
+    pending_payment:'En attente paiement', paid:'Payé', shipped:'Expédié', delivered:'Livré',
+    accepted:'Acceptée', declined:'Refusée', counter:'Contre-offre'
+  };
+  var statusClass = {
+    pending:'badge-pending', pending_payment:'badge-pending', counter:'badge-pending',
+    approved:'badge-approved', live:'badge-approved', paid:'badge-approved',
+    shipped:'badge-approved', delivered:'badge-approved', accepted:'badge-approved',
+    rejected:'badge-rejected', declined:'badge-rejected'
+  };
+  function fmt(d) {
+    return d ? new Date(d).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'}) : '—';
+  }
+
+  // ── LOAD ORDERS ─────────────────────────────────────────────
+  async function loadOrders() {
+    if (document.getElementById('orders-list').innerHTML) return;
+    var r = await sb.auth.getSession();
+    if (!r.data || !r.data.session) {
+      document.getElementById('orders-loading').style.display = 'none';
+      document.getElementById('orders-empty').style.display = 'block'; return;
+    }
+    var { data, error } = await sb.from('orders').select('*').order('created_at',{ascending:false});
+    document.getElementById('orders-loading').style.display = 'none';
+    if (error || !data || !data.length) { document.getElementById('orders-empty').style.display = 'block'; return; }
+    var list = document.getElementById('orders-list');
+    list.style.display = 'block';
+    list.innerHTML = data.map(function(o) {
+      var badge = statusLabels[o.status]||o.status;
+      var cls = statusClass[o.status]||'badge-pending';
+      return '<div class="order-card"><div class="order-header"><div><div class="order-player">'+(o.player||'—')+'</div><div class="order-ref">Réf. #'+o.id.substring(0,8).toUpperCase()+'</div></div><span class="order-badge '+cls+'">'+badge+'</span></div><div class="order-meta"><div class="order-meta-item"><span>Prix</span>'+(o.price?o.price+' €':'—')+'</div><div class="order-meta-item"><span>Livraison</span>'+(o.shipping_city||'—')+'</div><div class="order-meta-item"><span>Date</span>'+fmt(o.created_at)+'</div></div></div>';
+    }).join('');
+  }
+
+  // ── LOAD LISTINGS ───────────────────────────────────────────
+  async function loadListings() {
+    if (document.getElementById('listings-list').innerHTML) return;
+    var r = await sb.auth.getSession();
+    if (!r.data || !r.data.session) {
+      document.getElementById('listings-loading').style.display = 'none';
+      document.getElementById('listings-empty').style.display = 'block'; return;
+    }
+    var { data, error } = await sb.from('submissions').select('*').order('created_at',{ascending:false});
+    document.getElementById('listings-loading').style.display = 'none';
+    if (error || !data || !data.length) { document.getElementById('listings-empty').style.display = 'block'; return; }
+    var list = document.getElementById('listings-list');
+    list.style.display = 'block';
+    list.innerHTML = data.map(function(s) {
+      var badge = statusLabels[s.status]||s.status;
+      var cls = statusClass[s.status]||'badge-pending';
+      return '<div class="order-card"><div class="order-header"><div><div class="order-player">'+(s.player||'—')+'</div><div class="order-ref">'+(s.club||'')+(s.competition?' · '+s.competition:'')+'</div></div><span class="order-badge '+cls+'">'+badge+'</span></div><div class="order-meta"><div class="order-meta-item"><span>Prix demandé</span>'+(s.price?s.price+' €':'—')+'</div><div class="order-meta-item"><span>Tu reçois</span>'+(s.price?Math.round(s.price*0.9)+' €':'—')+'</div><div class="order-meta-item"><span>Soumis</span>'+fmt(s.created_at)+'</div></div></div>';
+    }).join('');
+  }
+
+  // ── LOAD OFFERS ─────────────────────────────────────────────
+  async function loadOffers() {
+    if (document.getElementById('offers-list').innerHTML) return;
+    var r = await sb.auth.getSession();
+    if (!r.data || !r.data.session) {
+      document.getElementById('offers-loading').style.display = 'none';
+      document.getElementById('offers-empty').style.display = 'block'; return;
+    }
+    var { data, error } = await sb.from('offers').select('*').order('created_at',{ascending:false});
+    document.getElementById('offers-loading').style.display = 'none';
+    if (error) {
+      document.getElementById('offers-empty').querySelector('.empty').textContent = 'Erreur : ' + error.message;
+      document.getElementById('offers-empty').style.display = 'block'; return;
+    }
+    if (!data || !data.length) { document.getElementById('offers-empty').style.display = 'block'; return; }
+    var list = document.getElementById('offers-list');
+    list.style.display = 'block';
+    list.innerHTML = data.map(function(o) {
+      var badge = statusLabels[o.status]||o.status;
+      var cls = statusClass[o.status]||'badge-pending';
+      var pct = o.list_price ? Math.round((o.amount/o.list_price)*100) : null;
+      return '<div class="order-card"><div class="order-header"><div><div class="order-player">'+(o.player||'—')+'</div><div class="order-ref">'+o.shirt_ref+'</div></div><span class="order-badge '+cls+'">'+badge+'</span></div><div class="order-meta"><div class="order-meta-item"><span>Ton offre</span><strong>'+o.amount+' €</strong></div>'+(o.list_price?'<div class="order-meta-item"><span>Prix demandé</span>'+o.list_price+' €</div>':'')+(pct?'<div class="order-meta-item"><span>% du prix</span>'+pct+' %</div>':'')+'<div class="order-meta-item"><span>Date</span>'+fmt(o.created_at)+'</div></div>'+(o.message?'<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:13px;color:var(--dim);font-style:italic">\"'+o.message+'\"</div>':'')+'</div>';
+    }).join('');
+  }
+
+  // ── TAB DATA LOADING ─────────────────────────────────────────
+  function loadTabData(id) {
+    if (id === 'orders') loadOrders();
+    else if (id === 'listings') loadListings();
+    else if (id === 'offers') loadOffers();
+  }
+
+  var _origShowTab = showTab;
+  showTab = function(id) {
+    _origShowTab(id);
+    var emptyMap = {orders:'orders-empty',listings:'listings-empty',offers:'offers-empty'};
+    var listMap  = {orders:'orders-list', listings:'listings-list', offers:'offers-list'};
+    if (emptyMap[id]) document.getElementById(emptyMap[id]).style.display = 'none';
+    if (currentUser) {
+      loadTabData(id);
+    } else {
+      sb.auth.getSession().then(function(r){
+        if (r.data && r.data.session) { currentUser = r.data.session.user; loadTabData(id); }
+      });
+    }
+  };
+
+
 } catch(err) {
   console.error('Supabase init error:', err);
 }

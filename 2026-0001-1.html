@@ -107,7 +107,7 @@
     .block-price{background:var(--white);border:1px solid var(--border);padding:24px 24px 20px;margin-bottom:10px}
     .price{font-family:'Cormorant Garamond',serif;font-size:54px;font-weight:600;color:var(--gold);line-height:1;margin-bottom:4px}
     .price-note{font-size:13px;color:var(--muted);margin-bottom:22px}
-    .btn-p{display:block;width:100%;background:var(--gold);color:#fff;border:none;padding:18px;margin-bottom:10px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:opacity .2s}
+    .btn-p{display:block;width: auto; min-width: 200px;background:var(--gold);color:#fff;border:none;padding:18px;margin-bottom:10px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:opacity .2s}
     .btn-p:hover{opacity:.88}
     .btn-s{display:block;width:100%;background:transparent;border:1px solid var(--border);color:var(--dim);padding:16px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:all .2s}
     .btn-s:hover{border-color:var(--dim);color:var(--text)}
@@ -356,9 +356,9 @@
     <div class="sp-name">Oumar Camara Jr</div>
     <div class="sp-meta">VSC 5–0 Tondela · 03/04/2026</div>
   </div>
-  <div class="sp-right">
+  <div class="sp-right" style="display:flex;align-items:center;gap:10px">
     <div class="sp-price">€ 290</div>
-    <a href="checkout.html?ref=2026-0001-1&player=Oumar%20Camara&club=Vit%C3%B3ria%20SC&comp=Liga%20Portugal&price=290" class="btn-p sp-btn">Acheter</a>
+    <a href="checkout.html?ref=2026-0001-1&player=Oumar%20Camara&club=Vit%C3%B3ria%20SC&comp=Liga%20Portugal&price=290" class="btn-p sp-btn" style="display:inline-block;padding:12px 24px">Acheter</a>
   </div>
 </div>
 
@@ -435,7 +435,7 @@
       <div class="price">€ 290</div>
       <div class="price-note">Frais de port à la charge de l'acheteur</div>
       <button class="btn-p" onclick="requireAuth('2026-0001-1.html')">Acheter maintenant</button>
-      <a href="offer.html?ref=2026-0001-1&player=Oumar%20Camara&club=Vit%C3%B3ria%20SC&comp=Liga%20Portugal&price=290" class="btn-s" id="btn-offer">Faire une offre</a>
+      <a href="offer.html?ref=2026-0001-1&player=Oumar%20Camara&club=Vit%C3%B3ria%20SC&comp=Liga%20Portugal&price=290" class="btn-s" id="btn-offer" style="display:inline-block;padding:12px 24px">Faire une offre</a>
       
         <div class="offer-note">Votre email ne sera pas communiqué au vendeur. Curated.football transmet votre offre et vous répond sous 24h.</div>
         <button class="btn-offer-send" id="btn-offer-send">Envoyer l'offre</button>
