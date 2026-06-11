@@ -6,22 +6,30 @@
   <title>Mon compte — Curated.football</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Outfit:wght@400;500&display=swap" rel="stylesheet">
 
-  <!-- UI logic — independent of Supabase -->
   <script>
     function showTab(id) {
       var ids = ['overview','profile','orders','listings'];
-      var tabs = document.querySelectorAll('.tab');
-      tabs.forEach(function(t, i) {
-        t.classList.toggle('active', ids[i] === id);
+      document.querySelectorAll('.tab').forEach(function(t,i){
+        t.classList.toggle('active', ids[i]===id);
       });
-      ids.forEach(function(tid) {
-        var el = document.getElementById('tab-' + tid);
-        if (el) el.className = 'tab-content' + (tid === id ? ' show' : '');
+      ids.forEach(function(tid){
+        var el = document.getElementById('tab-'+tid);
+        if(el) el.className = 'tab-content'+(tid===id?' show':'');
       });
+    }
+    function showToast(msg, isErr) {
+      var t = document.getElementById('toast');
+      if(!t) return;
+      t.textContent = msg;
+      t.className = 'toast'+(isErr?' err':'');
+      void t.offsetWidth;
+      t.classList.add('show');
+      setTimeout(function(){ t.classList.remove('show'); }, 3500);
     }
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{--bg:#f0ede9;--white:#fff;--border:#e0dbd4;--text:#141210;--dim:#4a4845;--muted:#9a9590;--gold:#b8954a}
@@ -54,24 +62,19 @@
     .btn-save{background:var(--gold);color:#fff;border:none;padding:14px 32px;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:opacity .2s}
     .btn-save:hover{opacity:.88}
     .btn-save:disabled{opacity:.4;cursor:default}
-    .save-msg{font-size:13px;margin-top:12px;display:none}
-    .save-msg.ok{color:#2d7d46;display:block}
-    .save-msg.err{color:#c0392b;display:block}
     .empty{text-align:center;padding:48px 24px;color:var(--muted);font-size:14px;line-height:1.7}
     .btn-browse{display:inline-block;margin-top:16px;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;background:var(--gold);color:#fff;text-decoration:none;padding:14px 28px}
-    @media(max-width:700px){nav{padding:16px 20px}.page{padding:32px 16px}.field-row{grid-template-columns:1fr}.tabs{overflow-x:auto}.tab{white-space:nowrap;padding:12px 16px}}
-
-    /* TOAST */
     .toast{position:fixed;bottom:24px;right:24px;z-index:500;padding:14px 20px;background:#141210;color:#e8e2d8;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;border-left:3px solid var(--gold);opacity:0;transform:translateY(16px);transition:all .3s;pointer-events:none}
     .toast.show{opacity:1;transform:translateY(0)}
     .toast.err{border-left-color:#c0392b}
-
+    @media(max-width:700px){nav{padding:16px 20px}.page{padding:32px 16px}.field-row{grid-template-columns:1fr}.tabs{overflow-x:auto}.tab{white-space:nowrap;padding:12px 16px}}
   </style>
 </head>
 <body>
+
 <nav>
   <a href="index.html" class="logo">CURATED<span class="tld">.football</span></a>
-  <button class="btn-logout" onclick="logout()">Se déconnecter</button>
+  <button class="btn-logout" id="btn-logout">Se déconnecter</button>
 </nav>
 
 <div class="page">
@@ -98,25 +101,23 @@
     <div class="card">
       <div class="card-label">Informations personnelles</div>
       <div class="field field-row">
-        <div><label>Prénom</label><input type="text" id="p-fn" placeholder="Prénom"></div>
-        <div><label>Nom</label><input type="text" id="p-ln" placeholder="Nom"></div>
+        <div><label>Prénom</label><input type="text" id="p-fn"></div>
+        <div><label>Nom</label><input type="text" id="p-ln"></div>
       </div>
-      <div class="field"><label>Email</label><input type="email" id="p-email" placeholder="Email"></div>
-      <div class="field"><label>Adresse</label><input type="text" id="p-addr" placeholder="Rue et numéro"></div>
+      <div class="field"><label>Email</label><input type="email" id="p-email"></div>
+      <div class="field"><label>Adresse</label><input type="text" id="p-addr"></div>
       <div class="field field-row">
-        <div><label>Code postal</label><input type="text" id="p-zip" placeholder="75001"></div>
-        <div><label>Ville</label><input type="text" id="p-city" placeholder="Paris"></div>
+        <div><label>Code postal</label><input type="text" id="p-zip"></div>
+        <div><label>Ville</label><input type="text" id="p-city"></div>
       </div>
-      <div class="field"><label>Pays</label><input type="text" id="p-country" placeholder="France"></div>
-      <button class="btn-save" id="btn-save-profile" onclick="saveProfile()">Enregistrer</button>
-      <div class="save-msg" id="profile-msg"></div>
+      <div class="field"><label>Pays</label><input type="text" id="p-country"></div>
+      <button class="btn-save" id="btn-save-profile">Enregistrer</button>
     </div>
     <div class="card">
       <div class="card-label">Mot de passe</div>
       <div class="field"><label>Nouveau mot de passe</label><input type="password" id="p-pwd1" placeholder="8 caractères minimum"></div>
-      <div class="field"><label>Confirmer</label><input type="password" id="p-pwd2" placeholder="Répéter"></div>
-      <button class="btn-save" id="btn-save-pwd" onclick="savePassword()">Changer le mot de passe</button>
-      <div class="save-msg" id="pwd-msg"></div>
+      <div class="field"><label>Confirmer</label><input type="password" id="p-pwd2"></div>
+      <button class="btn-save" id="btn-save-pwd">Changer le mot de passe</button>
     </div>
   </div>
 
@@ -129,105 +130,81 @@
   </div>
 </div>
 
+<div class="toast" id="toast"></div>
+
 <script>
-  var sb = supabase.createClient(
-    'https://pwakudhbkcmsdculjypp.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3YWt1ZGhia2Ntc2RjdWxqeXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMTY0MzUsImV4cCI6MjA5NjU5MjQzNX0.thdcRB_DJReRN0-0gvEDIPs4YTTQQLH3uTS2QMU0OQQ',
-    { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } }
-  );
+  var SUPA_URL = 'https://pwakudhbkcmsdculjypp.supabase.co';
+  var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3YWt1ZGhia2Ntc2RjdWxqeXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMTY0MzUsImV4cCI6MjA5NjU5MjQzNX0.thdcRB_DJReRN0-0gvEDIPs4YTTQQLH3uTS2QMU0OQQ';
 
-  var currentUser = null;
+  var sb = supabase.createClient(SUPA_URL, SUPA_KEY, {
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+  });
 
-  function fillUser(u) {
-    currentUser = u;
-    // Store for instant nav display
-    var n = (u.user_metadata&&(u.user_metadata.first_name||u.user_metadata.full_name||u.user_metadata.name)) || u.email.split('@')[0];
-    try { localStorage.setItem('cf_user', n); } catch(e) {}
-    var m = u.user_metadata || {};
-    var fn = m.first_name || (m.full_name||m.name||'').split(' ')[0] || '';
-    var ln = m.last_name || (m.full_name||m.name||'').split(' ').slice(1).join(' ') || '';
-    var since = new Date(u.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
-    document.getElementById('welcome').textContent = 'Bonjour'+(fn?', '+fn:'')+'.';
-    document.getElementById('ov-email').textContent = u.email;
-    document.getElementById('ov-name').textContent = (fn+' '+ln).trim()||u.email;
-    document.getElementById('ov-since').textContent = since;
-    document.getElementById('p-fn').value = fn;
-    document.getElementById('p-ln').value = ln;
-    document.getElementById('p-email').value = u.email;
-    document.getElementById('p-addr').value = m.address||'';
-    document.getElementById('p-zip').value = m.zip||'';
-    document.getElementById('p-city').value = m.city||'';
-    document.getElementById('p-country').value = m.country||'';
-  }
+  var currentSession = null;
 
-  // Debug: check localStorage on load
-  try {
-    var keys = Object.keys(localStorage).filter(function(k){ return k.includes('supabase') || k.includes('sb-'); });
-    console.log('Supabase localStorage keys:', keys);
-    keys.forEach(function(k){ console.log(k, ':', localStorage.getItem(k) ? 'present' : 'empty'); });
-  } catch(e) {}
-
-  var currentUser = null;
-
-  function fillUser(u) {
-    if (!u) return;
-    currentUser = u;
+  function fillUser(session) {
+    currentSession = session;
+    var u = session.user;
     var m = u.user_metadata || {};
     var fullName = m.full_name || m.name || '';
     var fn = m.first_name || fullName.split(' ')[0] || '';
     var ln = m.last_name  || fullName.split(' ').slice(1).join(' ') || '';
-    var since = new Date(u.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+    var since = new Date(u.created_at).toLocaleDateString('fr-FR', {day:'numeric',month:'long',year:'numeric'});
+
     try { localStorage.setItem('cf_user', fn || u.email.split('@')[0]); } catch(e) {}
-    var oe = document.getElementById('ov-email');
-    var on = document.getElementById('ov-name');
-    var os = document.getElementById('ov-since');
-    var ow = document.getElementById('welcome');
-    if (oe) oe.textContent = u.email || '—';
-    if (on) on.textContent = (fn+' '+ln).trim() || u.email || '—';
-    if (os) os.textContent = since;
-    if (ow) ow.textContent = 'Bonjour'+(fn?', '+fn:'')+'.';
-    var pf=document.getElementById('p-fn'), pl=document.getElementById('p-ln'),
-        pe=document.getElementById('p-email'), pa=document.getElementById('p-addr'),
-        pz=document.getElementById('p-zip'), pc=document.getElementById('p-city'),
-        py=document.getElementById('p-country');
-    if(pf) pf.value=fn; if(pl) pl.value=ln; if(pe) pe.value=u.email||'';
-    if(pa) pa.value=m.address||''; if(pz) pz.value=m.zip||'';
-    if(pc) pc.value=m.city||''; if(py) py.value=m.country||'';
+
+    document.getElementById('welcome').textContent = 'Bonjour' + (fn ? ', ' + fn : '') + '.';
+    document.getElementById('ov-email').textContent = u.email || '—';
+    document.getElementById('ov-name').textContent  = (fn + ' ' + ln).trim() || u.email || '—';
+    document.getElementById('ov-since').textContent = since;
+    document.getElementById('p-fn').value      = fn;
+    document.getElementById('p-ln').value      = ln;
+    document.getElementById('p-email').value   = u.email || '';
+    document.getElementById('p-addr').value    = m.address || '';
+    document.getElementById('p-zip').value     = m.zip || '';
+    document.getElementById('p-city').value    = m.city || '';
+    document.getElementById('p-country').value = m.country || '';
   }
 
-  // Auth: onAuthStateChange FIRST (catches OAuth callbacks), then getSession
-  var _redirectTimer = null;
-
+  // Listen for auth changes
   sb.auth.onAuthStateChange(function(event, session) {
     if (session) {
-      if (_redirectTimer) { clearTimeout(_redirectTimer); _redirectTimer = null; }
-      fillUser(session.user);
+      fillUser(session);
     } else if (event === 'SIGNED_OUT') {
       try { localStorage.removeItem('cf_user'); } catch(e) {}
-      location.href = 'login.html';
+      window.location.href = 'login.html';
     }
   });
 
+  // Check existing session
   sb.auth.getSession().then(function(r) {
     if (r.data && r.data.session) {
-      fillUser(r.data.session.user);
+      fillUser(r.data.session);
     } else {
       var isCallback = location.search.includes('code=') || location.hash.includes('access_token=');
       if (!isCallback) {
-        _redirectTimer = setTimeout(function() {
-          if (!currentUser) location.href = 'login.html';
+        setTimeout(function() {
+          if (!currentSession) window.location.href = 'login.html';
         }, 4000);
       }
     }
   });
 
-    async function saveProfile() {
-    var btn = document.getElementById('btn-save-profile');
-    var msg = document.getElementById('profile-msg');
-    if (btn) { btn.textContent = 'Enregistrement…'; btn.disabled = true; }
-    if (msg) msg.className = 'save-msg';
+  // Logout
+  document.getElementById('btn-logout').addEventListener('click', function() {
+    try { localStorage.removeItem('cf_user'); } catch(e) {}
+    sb.auth.signOut().then(function() {
+      window.location.href = 'index.html';
+    });
+  });
 
-    var { error } = await sb.auth.updateUser({
+  // Save profile
+  document.getElementById('btn-save-profile').addEventListener('click', function() {
+    var btn = document.getElementById('btn-save-profile');
+    btn.textContent = 'Enregistrement…';
+    btn.disabled = true;
+
+    sb.auth.updateUser({
       data: {
         first_name: document.getElementById('p-fn').value.trim(),
         last_name:  document.getElementById('p-ln').value.trim(),
@@ -236,53 +213,40 @@
         city:       document.getElementById('p-city').value.trim(),
         country:    document.getElementById('p-country').value.trim()
       }
-    });
-
-    if (btn) { btn.textContent = 'Enregistrer'; btn.disabled = false; }
-    var ok = !error;
-    var text = ok ? '✓ Informations enregistrées.' : 'Erreur : ' + error.message;
-    if (msg) { msg.textContent = text; msg.className = 'save-msg ' + (ok ? 'ok' : 'err'); }
-    showToast(text, !ok);
-
-    if (ok) {
-      var ne = document.getElementById('p-email').value.trim();
-      if (currentUser && ne !== currentUser.email) {
-        await sb.auth.updateUser({ email: ne });
-        showToast('✓ Confirme le changement d'email dans ta boite.');
+    }).then(function(r) {
+      btn.textContent = 'Enregistrer';
+      btn.disabled = false;
+      if (r.error) {
+        showToast('Erreur : ' + r.error.message, true);
+      } else {
+        showToast('✓ Informations enregistrées.');
       }
-    }
-  }
+    });
+  });
 
-
-  async function savePassword() {
-    var btn = document.getElementById('btn-save-pwd'); var msg = document.getElementById('pwd-msg');
+  // Save password
+  document.getElementById('btn-save-pwd').addEventListener('click', function() {
     var p1 = document.getElementById('p-pwd1').value;
     var p2 = document.getElementById('p-pwd2').value;
-    msg.className = 'save-msg';
-    if (p1.length < 8) { msg.textContent = 'Trop court (8 min.).'; msg.className = 'save-msg err'; return; }
-    if (p1 !== p2)     { msg.textContent = 'Ne correspondent pas.'; msg.className = 'save-msg err'; return; }
-    btn.textContent = 'Mise à jour…'; btn.disabled = true;
-    var { error } = await sb.auth.updateUser({ password: p1 });
-    btn.textContent = 'Changer le mot de passe'; btn.disabled = false;
-    msg.textContent = error ? error.message : '✓ Mot de passe mis à jour.';
-    msg.className = 'save-msg ' + (error ? 'err' : 'ok');
-    showToast(error ? error.message : '✓ Mot de passe mis à jour.', !!error);
-    if (!error) { document.getElementById('p-pwd1').value = ''; document.getElementById('p-pwd2').value = ''; }
-  }
+    if (p1.length < 8) { showToast('Mot de passe trop court (8 min.)', true); return; }
+    if (p1 !== p2)     { showToast('Les mots de passe ne correspondent pas', true); return; }
 
-  async function logout() {
-    try { localStorage.removeItem('cf_user'); } catch(e) {}
-    await sb.auth.signOut();
-    location.href = 'index.html';
-  } catch(e) {}
-    await sb.auth.signOut();
-    location.href = 'index.html';
-  } catch(e) {}
-    await sb.auth.signOut();
-    location.href = 'index.html';
-  }
+    var btn = document.getElementById('btn-save-pwd');
+    btn.textContent = 'Mise à jour…';
+    btn.disabled = true;
+
+    sb.auth.updateUser({ password: p1 }).then(function(r) {
+      btn.textContent = 'Changer le mot de passe';
+      btn.disabled = false;
+      if (r.error) {
+        showToast('Erreur : ' + r.error.message, true);
+      } else {
+        showToast('✓ Mot de passe mis à jour.');
+        document.getElementById('p-pwd1').value = '';
+        document.getElementById('p-pwd2').value = '';
+      }
+    });
+  });
 </script>
-
-<div class="toast" id="toast"></div>
 </body>
 </html>
