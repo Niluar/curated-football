@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Outfit:wght@400;500&display=swap" rel="stylesheet">
   <script>
     function showTab(id) {
-      var ids = ['overview','profile','orders','listings'];
+      var ids = ['overview','profile','orders','listings','offers'];
       document.querySelectorAll('.tab').forEach(function(t,i){
         t.classList.toggle('active', ids[i]===id);
       });
@@ -108,6 +108,7 @@
     <button class="tab" type="button" onclick="showTab('profile')">Mon espace</button>
     <button class="tab" type="button" onclick="showTab('orders')">Mes achats</button>
     <button class="tab" type="button" onclick="showTab('listings')">Mes ventes</button>
+    <button class="tab" type="button" onclick="showTab('offers')">Mes offres</button>
   </div>
   <div class="tab-content show" id="tab-overview">
     <div class="card">
@@ -149,6 +150,12 @@
     <div id="listings-loading" class="card"><div class="empty" style="padding:24px">Chargement...</div></div>
     <div id="listings-list" style="display:none"></div>
     <div id="listings-empty" class="card" style="display:none"><div class="empty">Aucune mise en vente.<br><a href="sell.html" class="btn-browse">Vendre un maillot</a></div></div>
+  </div>
+
+  <div class="tab-content" id="tab-offers">
+    <div id="offers-loading" class="card"><div class="empty" style="padding:24px">Chargement...</div></div>
+    <div id="offers-list" style="display:none"></div>
+    <div id="offers-empty" class="card" style="display:none"><div class="empty">Aucune offre envoyée.<br><a href="catalogue.html" class="btn-browse">Voir le catalogue</a></div></div>
   </div>
 </div>
 <div class="toast" id="toast"></div>
