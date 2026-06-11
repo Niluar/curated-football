@@ -148,23 +148,22 @@
   const sb = supabase.createClient(
     'https://pwakudhbkcmsdculjypp.supabase.co',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3YWt1ZGhia2Ntc2RjdWxqeXBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMTY0MzUsImV4cCI6MjA5NjU5MjQzNX0.thdcRB_DJReRN0-0gvEDIPs4YTTQQLH3uTS2QMU0OQQ',
-    {
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: true,
-        storage: window.localStorage
-      }
-    }
+    { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } }
   );
 
   var selectedAuth = 'mws';
 
-  // Auth check - redirect to login if not connected
+  // Show cached name instantly
+  try {
+    var cached = localStorage.getItem('cf_user');
+    var l = document.getElementById('nav-account');
+    if (cached && l) { l.textContent = cached; l.href = 'account.html'; }
+  } catch(e) {}
+
+  // Verify session
   sb.auth.getSession().then(function(r) {
     var session = r.data && r.data.session;
     if (!session) {
-      // Save destination and redirect to login
       sessionStorage.setItem('after_login', 'sell.html');
       window.location.href = 'login.html?next=sell.html';
       return;
@@ -172,6 +171,14 @@
     var link = document.getElementById('nav-account');
     var name = (session.user.user_metadata && session.user.user_metadata.first_name) || session.user.email.split('@')[0];
     if (link) { link.textContent = name; link.href = 'account.html'; }
+  });
+
+  // Don't clear nav on null states — only on explicit signout
+  sb.auth.onAuthStateChange(function(e, s) {
+    if (s) {
+      var n = (s.user.user_metadata&&(s.user.user_metadata.first_name||s.user.user_metadata.name))||s.user.email.split('@')[0];
+      try { localStorage.setItem('cf_user', n); } catch(err) {}
+    }
   });
 
   function selectAuth(el) {
